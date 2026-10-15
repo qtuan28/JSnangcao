@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Giới Thiệu – SneakerZone | Câu Chuyện Thương Hiệu & Sứ Mệnh</title>
+  <meta name="description" content="Khám phá câu chuyện thương hiệu SneakerZone - Điểm đến số 1 cho các tín đồ giày sneaker thể thao chính hãng tại Việt Nam." />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .about-hero {
+      position: relative;
+      background: #111;
+      color: #fff;
+      padding: 100px 32px 80px;
+      text-align: center;
+      overflow: hidden;
+    }
+    .about-hero::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .about-hero-tag {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 16px;
+    }
+    .about-hero-title {
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      max-width: 900px;
+      margin: 0 auto 24px;
+      text-transform: uppercase;
+    }
+    .about-hero-desc {
+      font-size: 1.15rem;
+      color: #ccc;
+      max-width: 650px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    .about-story-section {
+      max-width: 1200px;
+      margin: 80px auto;
+      padding: 0 32px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    @media (max-width: 860px) {
+      .about-story-section {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+    }
+    .story-image-wrap {
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+    .story-image-wrap img {
+      width: 100%;
+      height: 480px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+    .story-image-wrap:hover img {
+      transform: scale(1.03);
+    }
+    .story-content h2 {
+      font-size: 2.3rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+    .story-content p {
+      color: var(--gray-600);
+      font-size: 1.05rem;
+      line-height: 1.8;
+      margin-bottom: 16px;
+    }
+
+    /* STATS GRID */
+    .about-stats-bar {
+      background: var(--gray-50);
+      border-top: 1px solid var(--gray-100);
+      border-bottom: 1px solid var(--gray-100);
+      padding: 60px 32px;
+    }
+    .about-stats-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 32px;
+      text-align: center;
+    }
+    @media (max-width: 768px) {
+      .about-stats-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+      }
+    }
+    .stat-number {
+      font-size: 3rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: var(--black);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .stat-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--gray-600);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* VALUES CARDS */
+    .values-section {
+      max-width: 1200px;
+      margin: 90px auto;
+      padding: 0 32px;
+    }
+    .values-header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+    .values-header h2 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+    }
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      .values-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 500px) {
+      .values-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .value-card {
+      background: var(--white);
+      border: 1px solid var(--gray-100);
+      border-radius: 16px;
+      padding: 36px 24px;
+      text-align: center;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .value-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+      border-color: var(--black);
+    }
+    .value-icon {
+      font-size: 2.5rem;
+      margin-bottom: 18px;
+      display: inline-block;
+    }
+    .value-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .value-desc {
+      color: var(--gray-600);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    /* BANNER CTA */
+    .about-cta {
+      background: var(--black);
+      color: var(--white);
+      border-radius: 24px;
+      max-width: 1200px;
+      margin: 40px auto 90px;
+      padding: 60px 40px;
+      text-align: center;
+    }
+    .about-cta h2 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .about-cta p {
+      color: #aaa;
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto 32px;
+    }
+    .btn-about-shop {
+      display: inline-block;
+      background: var(--white);
+      color: var(--black);
+      font-weight: 800;
+      padding: 16px 36px;
+      border-radius: 999px;
+      font-size: 1rem;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-about-shop:hover {
+      background: #e5e5e5;
+      transform: scale(1.03);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ========== MAIN NIKE HEADER ========== -->
+<header class="header">
+  <div class="header-inner">
+    <!-- SneakerZone Logo -->
+    <a href="index.html" class="logo">
+      <svg class="swoosh-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M21.7 4.2C15.8 8.1 10.6 13.8 6.5 19.5 5 17.5 3.5 15.6 2.3 14c-.6-.7-1.7-.2-1.7.7 0 .5.3 1 .7 1.4 3 3.6 5.8 7.3 6.6 7.8.6.4 1.3.1 1.7-.5 4.3-6.5 9.7-13.1 16-17.6.7-.5.2-1.6-.7-1.6h-3.2z"/>
+      </svg>
+      <span class="logo-text">Sneaker<span>Zone</span></span>
+    </a>
+
+    <!-- Center Navigation (Trang chủ, Sản phẩm, Giới thiệu, Liên hệ) -->
+    <nav class="nav" id="mainNav">
+      <a href="index.html">Trang chủ</a>
+      <a href="products.html">Sản phẩm</a>
+      <a href="about.html" class="active">Giới thiệu</a>
+      <a href="contact.html">Liên hệ</a>
+    </nav>
+
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <!-- Search Bar -->
+      <div class="header-search-box">
+        <input type="text" id="headerSearchInput" placeholder="Tìm kiếm sản phẩm..." autocomplete="off" />
+      </div>
+
+      <!-- Wishlist Button -->
+      <button class="btn-round-action" title="Mục yêu thích" onclick="showToast('Danh sách Yêu thích của bạn')">
+        ♡
+      </button>
+
+      <!-- Cart Button -->
+      <button class="btn-round-action btn-cart-trigger" id="btnOpenCart" title="Giỏ hàng">
+        <span style="font-size:0.75rem; font-weight:700;">GIỎ</span>
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+
+      <!-- User Area -->
+      <div id="headerUserArea">
+        <a href="login.html" class="btn-nike-login">Đăng nhập</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ========== ANNOUNCEMENT TICKER ========== -->
+<div class="announce-bar">
+  <div class="announce-content">
+    <span><strong>SneakerZone Story:</strong> Đồng hành cùng từng bước chạy và đam mê sneaker thể thao của bạn</span>
+  </div>
+</div>
+
+<!-- ========== CART SIDEBAR ========== -->
+<div class="cart-overlay" id="cartOverlay"></div>
+<aside class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h3>Túi đồ của bạn</h3>
+    <button class="btn-close-cart" id="btnCloseCart">✕</button>
+  </div>
+  <div class="cart-items" id="cartItemsContainer">
+    <div class="cart-empty"><p>Túi đồ của bạn đang trống</p></div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total">
+      <span>Tổng thanh toán:</span>
+      <span id="cartTotal">0₫</span>
+    </div>
+    <button class="btn-checkout" id="btnCheckout">Thanh toán ngay →</button>
+  </div>
+</aside>
+
+<!-- ========== ABOUT HERO ========== -->
+<section class="about-hero">
+  <span class="about-hero-tag">VỀ CHÚNG TÔI · SNEAKERZONE</span>
+  <h1 class="about-hero-title">ĐÁNH THỨC ĐAM MÊ BƯỚC CHẠY CỦA BẠN</h1>
+  <p class="about-hero-desc">
+    Chúng tôi không chỉ bán những đôi giày sneaker, chúng tôi mang đến nguồn cảm hứng thể thao đỉnh cao và phong cách sống bứt phá mọi giới hạn.
+  </p>
+</section>
+
+<!-- ========== STORY SECTION ========== -->
+<section class="about-story-section">
+  <div class="story-image-wrap">
+    <img src="https://images.unsplash.com/photo-1552346154-21d32810aba3?w=800&q=80&auto=format&fit=crop" alt="Câu chuyện SneakerZone" />
+  </div>
+  <div class="story-content">
+    <h2>Khởi Nguồn Từ Niềm Đam Mê Sneaker Đích Thực</h2>
+    <p>
+      Được thành lập từ năm 2018 bởi những tín đồ say mê văn hóa thể thao đường phố, SneakerZone ra đời với một sứ mệnh giản dị nhưng mãnh liệt: mang những phiên bản giày thể thao chính hãng đẹp nhất thế giới về tận tay người yêu giày tại Việt Nam.
+    </p>
+    <p>
+      Từ những đôi <strong>Nike Air Max</strong> huyền thoại, <strong>Adidas Ultraboost</strong> êm ái đến chất retro kinh điển của <strong>Converse Chuck 70</strong> và <strong>Puma RS-X</strong>, mỗi sản phẩm tại SneakerZone đều trải qua quy trình tuyển chọn và kiểm định nghiêm ngặt để đảm bảo chất lượng hoàn hảo.
+    </p>
+    <p>
+      Dù bạn là một vận động viên chuyên nghiệp hay một bạn trẻ đam mê thời trang dạo phố, SneakerZone luôn có đôi giày hoàn hảo dành riêng cho hành trình của bạn.
+    </p>
+  </div>
+</section>
+
+<!-- ========== STATS BAR ========== -->
+<div class="about-stats-bar">
+  <div class="about-stats-container">
+    <div>
+      <div class="stat-number">50K+</div>
+      <div class="stat-label">Đôi giày đã trao tay</div>
+    </div>
+    <div>
+      <div class="stat-number">100%</div>
+      <div class="stat-label">Cam kết chính hãng</div>
+    </div>
+    <div>
+      <div class="stat-number">99.8%</div>
+      <div class="stat-label">Khách hàng hài lòng</div>
+    </div>
+    <div>
+      <div class="stat-number">30 Ngày</div>
+      <div class="stat-label">Đổi trả miễn phí</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== CORE VALUES ========== -->
+<section class="values-section">
+  <div class="values-header">
+    <h2>GIÁ TRỊ CỐT LÕI TẠI SNEAKERZONE</h2>
+  </div>
+  <div class="values-grid">
+    <div class="value-card">
+      <span class="value-icon" style="font-size:1.1rem; font-weight:800; color:var(--gray-800);">01</span>
+      <h3 class="value-title">Chính Hãng 100%</h3>
+      <p class="value-desc">Cam kết sản phẩm nhập khẩu nguyên hộp chính hãng từ Nike, Adidas, Puma, Converse. Hoàn tiền 200% nếu phát hiện hàng giả.</p>
+    </div>
+    <div class="value-card">
+      <span class="value-icon" style="font-size:1.1rem; font-weight:800; color:var(--gray-800);">02</span>
+      <h3 class="value-title">Giao Hàng Siêu Tốc</h3>
+      <p class="value-desc">Giao hàng hỏa tốc nội thành trong 2 giờ. Toàn quốc chỉ 1-2 ngày với chính sách kiểm tra hàng trước khi thanh toán.</p>
+    </div>
+    <div class="value-card">
+      <span class="value-icon" style="font-size:1.1rem; font-weight:800; color:var(--gray-800);">03</span>
+      <h3 class="value-title">Đổi Trả Dễ Dàng</h3>
+      <p class="value-desc">Hỗ trợ đổi size và đổi mẫu thoải mái trong vòng 30 ngày. Thủ tục nhanh gọn, nhân viên hỗ trợ nhiệt tình 24/7.</p>
+    </div>
+    <div class="value-card">
+      <span class="value-icon" style="font-size:1.1rem; font-weight:800; color:var(--gray-800);">04</span>
+      <h3 class="value-title">Bảo Hành Keo Chỉ</h3>
+      <p class="value-desc">Chính sách bảo hành keo chỉ trọn đời cho mọi đôi giày mua tại SneakerZone. Vệ sinh và làm sạch giày miễn phí trọn năm đầu.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CALL TO ACTION ========== -->
+<div class="about-cta">
+  <h2>SẴN SÀNG TÌM ĐÔI GIÀY CỦA BẠN?</h2>
+  <p>Khám phá ngay bộ sưu tập giày thể thao mới nhất hôm nay và nhận ưu đãi miễn phí vận chuyển cho đơn hàng từ 1.000.000₫.</p>
+  <a href="products.html" class="btn-about-shop">Khám Phá Sản Phẩm Ngay →</a>
+</div>
+
+<!-- ========== FOOTER ========== -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>TÌM CỬA HÀNG</h4>
+        <ul>
+          <li><a href="products.html">TÌM CỬA HÀNG</a></li>
+          <li><a href="about.html">TRỞ THÀNH THÀNH VIÊN</a></li>
+          <li><a href="contact.html">LIÊN HỆ PHẢN HỒI</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>TRỢ GIÚP</h4>
+        <ul>
+          <li><a href="#">Tình trạng đơn hàng</a></li>
+          <li><a href="#">Giao hàng & Vận chuyển</a></li>
+          <li><a href="#">Chính sách đổi trả</a></li>
+          <li><a href="contact.html">Liên hệ chúng tôi</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>VỀ SNEAKERZONE</h4>
+        <ul>
+          <li><a href="about.html">Tin tức</a></li>
+          <li><a href="about.html">Nghề nghiệp</a></li>
+          <li><a href="about.html">Nhà đầu tư</a></li>
+          <li><a href="about.html">Bền vững</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>KẾT NỐI VỚI CHÚNG TÔI</h4>
+        <div class="footer-socials">
+          <a href="#" class="social-btn" title="Facebook">f</a>
+          <a href="#" class="social-btn" title="Instagram">ig</a>
+          <a href="#" class="social-btn" title="YouTube">yt</a>
+          <a href="#" class="social-btn" title="Twitter">tw</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-country">Việt Nam · © 2026 SneakerZone, Inc. All Rights Reserved.</div>
+      <div class="footer-legal">
+        <a href="#">Hướng dẫn mua hàng</a>
+        <a href="#">Điều khoản sử dụng</a>
+        <a href="#">Chính sách bảo mật</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Shared JavaScripts -->
+<script src="js/data.js"></script>
+<script src="js/Cart.js"></script>
+<script>
+  // Setup header search
+  const searchInput = document.getElementById('headerSearchInput');
+  if (searchInput) {
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && searchInput.value.trim()) {
+        window.location.href = `products.html?search=${encodeURIComponent(searchInput.value.trim())}`;
+      }
+    });
+  }
+</script>
+
+</body>
+</html>

@@ -14,17 +14,15 @@ class Cart {
     localStorage.setItem('cart', JSON.stringify(this.items));
   }
 
-  // Thêm sản phẩm vào giỏ hàng
-  addToCart(product) {
-    // Kiểm tra sản phẩm đã có trong giỏ chưa
+  // Thêm sản phẩm vào giỏ hàng (áp dụng tham số mặc định quantity = 1)
+  addToCart(product, quantity = 1) {
+    const qty = Number(quantity) || 1;
     const existing = this.items.find(item => item.id === product.id);
 
     if (existing) {
-      // Nếu có rồi thì tăng số lượng
-      existing.quantity += 1;
+      existing.quantity += qty;
     } else {
-      // Nếu chưa có thì thêm mới với quantity = 1
-      this.items.push({ ...product, quantity: 1 });
+      this.items.push({ ...product, quantity: qty });
     }
 
     this.save();
@@ -209,6 +207,7 @@ function setupCheckout() {
 }
 
 // ============================================================
+// ============================================================
 // Hiển thị thông tin user đã đăng nhập trên Header
 // ============================================================
 function renderHeaderUser() {
@@ -216,33 +215,39 @@ function renderHeaderUser() {
   if (!area) return;
 
   const userJson = localStorage.getItem('currentUser');
-  if (!userJson) return;
-
-  const user = JSON.parse(userJson);
-  let html = `
-    <div class="user-info">
-      <div class="avatar">U</div>
-      <span>${user.name}</span>
-    </div>
-    <button class="btn-logout" onclick="logout()">Đăng xuất</button>`;
-
-  if (user.role === 'admin') {
-    html = `
-      <div class="user-info">
-        <div class="avatar">A</div>
-        <span>${user.name}</span>
-      </div>
-      <a href="admin.html" class="btn-login" style="margin-left:4px;">Admin</a>
-      <button class="btn-logout" onclick="logout()">Đăng xuất</button>`;
+  if (!userJson) {
+    area.innerHTML = `<a href="login.html" class="btn-nike-login">Đăng nhập</a>`;
+    return;
   }
 
-  area.innerHTML = html;
+  const user = JSON.parse(userJson);
+  const initial = (user.name || 'U').charAt(0).toUpperCase();
+  const isAdmin = user.role === 'admin';
+
+  area.innerHTML = `
+    <div class="user-header-group">
+      ${isAdmin ? `
+        <a href="admin.html" class="btn-admin-badge" title="Vào trang quản trị">
+          <span>Quản trị</span>
+        </a>
+      ` : ''}
+
+      <div class="user-profile-pill" style="cursor:default;">
+        <div class="user-avatar-circle">${initial}</div>
+        <span class="user-name-text">${user.name}</span>
+      </div>
+
+      <button class="btn-header-logout" onclick="logout()" title="Đăng xuất">
+        Đăng xuất
+      </button>
+    </div>
+  `;
 }
 
 function logout() {
   localStorage.removeItem('currentUser');
-  showToast('Đã đăng xuất!');
-  setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+  showToast('Đã đăng xuất thành công!');
+  setTimeout(() => { window.location.href = 'index.html'; }, 600);
 }
 
 // Khởi tạo chung khi trang load
