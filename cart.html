@@ -418,6 +418,7 @@
     renderCartPage();
     showToast('Đã xóa sản phẩm khỏi giỏ hàng', 'error');
   }
+  window.renderCartPageItems = renderCartPage;
 
   function goToCheckout() {
     if (cart.items.length === 0) {

@@ -1,30 +1,47 @@
 // ============================================================
-// main.js – Trang chủ (index.html)
-// Phong cách Nike: Dùng async/await + fetch (fallback LOCAL_DB)
+// main.js – TRANG CHỦ (index.html)
+// Môn học: WEB2064 - JavaScript Nâng Cao
+// Kiến thức áp dụng:
+// 1. OOP (Class Product): Mô hình hóa thông tin sản phẩm và phương thức getInfo()
+// 2. Async/Await & Fetch API: Đọc db.json với cơ chế fallback LOCAL_DB
+// 3. Render danh mục động (Categories): Lọc sản phẩm nổi bật theo danh mục
+// 4. Tìm kiếm từ Header: Bắt sự kiện bàn phím (Enter) chuyển hướng sang trang products.html
+// 5. Quản lý trạng thái: Thêm sản phẩm vào giỏ hàng dùng instance cart từ Cart.js
 // ============================================================
 
-// ===== CLASS PRODUCT (OOP) =====
+// ============================================================
+// 1. CLASS PRODUCT (OOP - Mô hình hóa sản phẩm)
+// ============================================================
 class Product {
+  /**
+   * Khởi tạo đối tượng Product từ dữ liệu thô
+   * @param {Object} data - Dữ liệu sản phẩm từ db.json
+   */
   constructor(data) {
-    this.id          = data.id;
-    this.name        = data.name;
-    this.category    = data.category;
-    this.categoryId  = data.categoryId;
-    this.price       = data.price;
-    this.stock       = data.stock;
-    this.image       = data.image;
-    this.description = data.description;
-    this.sizes       = data.sizes || [38, 39, 40, 41, 42];
+    this.id          = data.id;                                       // Mã sản phẩm
+    this.name        = data.name;                                     // Tên giày
+    this.category    = data.category;                                 // Thương hiệu (Nike, Adidas,...)
+    this.categoryId  = data.categoryId;                               // ID danh mục
+    this.price       = Number(data.price);                            // Giá bán
+    this.stock       = Number(data.stock);                            // Số lượng tồn kho
+    this.image       = data.image;                                    // Link ảnh
+    this.description = data.description;                              // Mô tả ngắn
+    this.sizes       = data.sizes || [38, 39, 40, 41, 42];            // Size giày
   }
 
-  // Trả về thông tin sản phẩm dạng chuỗi
+  /**
+   * Phương thức trả về chuỗi thông tin tóm tắt sản phẩm (yêu cầu OOP - WEB2064)
+   */
   getInfo() {
     return `${this.name} - ${formatPrice(this.price)}`;
   }
 }
 
-// ===== ĐỌC DỮ LIỆU TỪ db.json (fallback LOCAL_DB nếu fetch lỗi) =====
+// ============================================================
+// 2. ĐỌC DỮ LIỆU TỪ db.json (Kết hợp fallback LOCAL_DB)
+// ============================================================
 async function loadData() {
+  // 1. Đọc dữ liệu do Admin lưu trong localStorage nếu có
   const saved = localStorage.getItem('adminData');
   if (saved) {
     try {
@@ -32,15 +49,19 @@ async function loadData() {
       if (Array.isArray(parsed.products) && parsed.products.length > 0) {
         return parsed;
       }
-    } catch {}
+    } catch (e) {
+      console.warn('Lỗi parse adminData:', e);
+    }
   }
 
+  // 2. Thử fetch từ file db.json trên máy chủ
   try {
     const response = await fetch('db.json');
     if (!response.ok) throw new Error('fetch failed');
     return await response.json();
   } catch (err) {
-    console.warn('Dùng dữ liệu fallback LOCAL_DB', err);
+    // 3. Dữ liệu dự phòng LOCAL_DB từ data.js nếu mở trực tiếp bằng file://
+    console.warn('Dùng dữ liệu fallback LOCAL_DB từ data.js:', err);
     if (typeof LOCAL_DB !== 'undefined') {
       return LOCAL_DB;
     }
@@ -48,14 +69,16 @@ async function loadData() {
   }
 }
 
-// ===== RENDER CATEGORIES =====
+// ============================================================
+// 3. RENDER DANH MỤC THƯƠNG HIỆU (Category Pills) TRÊN TRANG CHỦ
+// ============================================================
 function renderCategories(categories) {
   const container = document.getElementById('categoriesContainer');
   if (!container) return;
 
   container.innerHTML = '';
 
-  // Nút "Tất cả"
+  // Nút "Tất cả sản phẩm" đầu tiên
   const allCard = document.createElement('div');
   allCard.className = 'category-pill active';
   allCard.id = 'cat-all';
@@ -63,7 +86,7 @@ function renderCategories(categories) {
   allCard.addEventListener('click', () => filterByCategory(''));
   container.appendChild(allCard);
 
-  // Render từng danh mục
+  // Render từng danh mục thương hiệu
   categories.forEach(cat => {
     const card = document.createElement('div');
     card.className = 'category-pill';
@@ -74,13 +97,16 @@ function renderCategories(categories) {
   });
 }
 
-// ===== RENDER PRODUCTS =====
+// ============================================================
+// 4. RENDER SẢN PHẨM NỔI BẬT RA MÀN HÌNH TRANG CHỦ
+// ============================================================
 function renderProducts(products, containerId = 'featuredProductsContainer') {
   const container = document.getElementById(containerId);
   if (!container) return;
 
   container.innerHTML = '';
 
+  // Trường hợp danh mục không có sản phẩm nào
   if (products.length === 0) {
     container.innerHTML = `
       <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--gray-400);">
@@ -90,17 +116,17 @@ function renderProducts(products, containerId = 'featuredProductsContainer') {
     return;
   }
 
+  // Duyệt qua danh sách để tạo card HTML
   products.forEach(data => {
     const product = new Product(data);
 
-    // Build size chips html
+    // Danh sách size hiển thị khi hover
     const sizesHtml = (product.sizes || []).slice(0, 6).map(s =>
       `<span class="size-chip" onclick="selectCardSize(event, ${s})">${s}</span>`
     ).join('');
 
+    // Nhãn nổi bật
     const badgeText = product.price > 4000000 ? 'Độc quyền' : (product.id <= 2 ? 'Mới ra mắt' : 'Bán chạy');
-
-    const isFav = typeof wishlist !== 'undefined' && wishlist.has(product.id);
 
     const card = document.createElement('div');
     card.className = 'product-card';
@@ -111,13 +137,6 @@ function renderProducts(products, containerId = 'featuredProductsContainer') {
              loading="lazy"
              onerror="this.src='https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80'" />
         <span class="product-badge">${badgeText}</span>
-        <button class="product-wishlist ${isFav ? 'active' : ''}" 
-                data-product-id="${product.id}" 
-                title="${isFav ? 'Bỏ yêu thích' : 'Yêu thích'}" 
-                style="${isFav ? 'color:#e11d48;' : ''}" 
-                onclick="event.stopPropagation(); toggleWishlistProduct(${JSON.stringify(data).replace(/"/g, '&quot;')}, this)">
-          ${isFav ? '♥' : '♡'}
-        </button>
         ${sizesHtml ? `
         <div class="product-sizes">
           <span class="size-label">Size:</span>
@@ -141,65 +160,37 @@ function renderProducts(products, containerId = 'featuredProductsContainer') {
 
     container.appendChild(card);
   });
-
-  if (typeof syncAllWishlistButtons === 'function') {
-    syncAllWishlistButtons();
-  }
 }
 
-// ===== THÊM VÀO GIỎ HÀNG =====
+// ============================================================
+// 5. THAO TÁC THÊM GIỎ HÀNG & CHỌN SIZE TRÊN CARD
+// ============================================================
 function addProductToCart(productData) {
-  cart.addToCart(productData);
-  renderCart();
+  cart.addToCart(productData); // Gọi method của class Cart trong Cart.js
+  renderCart();                // Cập nhật drawer giỏ hàng
   showToast(`Đã thêm "${productData.name}" vào giỏ hàng!`);
 }
 
-// ===== WISHLIST =====
-function toggleWishlist(productOrBtn, maybeBtnOrEvent) {
-  if (productOrBtn && productOrBtn.id) {
-    toggleWishlistProduct(productOrBtn, maybeBtnOrEvent);
-  } else if (productOrBtn instanceof HTMLElement || (productOrBtn && productOrBtn.tagName)) {
-    const btn = productOrBtn;
-    const e = maybeBtnOrEvent;
-    if (e && e.stopPropagation) e.stopPropagation();
-    const pid = btn.getAttribute('data-product-id');
-    if (pid && allProducts.length > 0) {
-      const prod = allProducts.find(p => Number(p.id) === Number(pid));
-      if (prod) {
-        toggleWishlistProduct(prod, btn);
-        return;
-      }
-    }
-    if (btn.textContent.trim() === '♡') {
-      btn.textContent = '♥';
-      btn.style.color = '#e11d48';
-      showToast('Đã thêm vào mục Yêu thích!');
-    } else {
-      btn.textContent = '♡';
-      btn.style.color = '';
-      showToast('Đã xóa khỏi mục Yêu thích', 'error');
-    }
-  }
-}
-window.toggleWishlist = toggleWishlist;
-
-
 function selectCardSize(e, size) {
-  e.stopPropagation();
+  e.stopPropagation(); // Không cho nổi bọt để tránh click nhảy sang detail.html
   showToast(`Đã chọn size ${size}`);
 }
 
-// ===== LỌC THEO DANH MỤC =====
+// ============================================================
+// 6. LỌC SẢN PHẨM THEO DANH MỤC TRÊN TRANG CHỦ
+// ============================================================
 let allProducts = [];
 
 function filterByCategory(categoryName) {
-  // Bỏ active ở tất cả các pill
+  // Bỏ class active ở tất cả các tab danh mục
   document.querySelectorAll('.category-pill').forEach(c => c.classList.remove('active'));
 
   if (categoryName === '') {
+    // Nếu chọn "Tất cả"
     document.getElementById('cat-all')?.classList.add('active');
     renderProducts(allProducts, 'featuredProductsContainer');
   } else {
+    // Nếu chọn một thương hiệu cụ thể (Nike, Adidas,...)
     const filtered = allProducts.filter(p => p.category.toLowerCase() === categoryName.toLowerCase());
     renderProducts(filtered, 'featuredProductsContainer');
     document.querySelectorAll('.category-pill').forEach(c => {
@@ -210,11 +201,14 @@ function filterByCategory(categoryName) {
   }
 }
 
-// ===== HEADER SEARCH HANDLING =====
+// ============================================================
+// 7. Ô TÌM KIẾM TRÊN HEADER TRANG CHỦ
+// ============================================================
 function setupHeaderSearch() {
   const searchInput = document.getElementById('headerSearchInput');
   if (!searchInput) return;
 
+  // Khi nhấn Enter -> Chuyển hướng sang trang products.html kèm tham số ?q=...
   searchInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       const q = searchInput.value.trim();
@@ -225,7 +219,9 @@ function setupHeaderSearch() {
   });
 }
 
-// ===== KHỞI CHẠY =====
+// ============================================================
+// 8. KHỞI CHẠY TRANG CHỦ (Init Flow)
+// ============================================================
 async function init() {
   const data = await loadData();
   allProducts = data.products || [];
@@ -235,4 +231,5 @@ async function init() {
   setupHeaderSearch();
 }
 
+// Chạy hàm khởi tạo
 init();

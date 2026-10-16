@@ -83,20 +83,45 @@ function formatPrice(price) {
 }
 
 // ============================================================
-// Helper: Hiện Toast thông báo
+// Helper: Hiện Toast thông báo (Tối đa 3 thông báo cùng lúc)
 // ============================================================
+function dismissToast(toast) {
+  if (!toast || toast.classList.contains('toast-exit')) return;
+  toast.classList.add('toast-exit');
+  setTimeout(() => {
+    toast.remove();
+  }, 250);
+}
+
 function showToast(message, type = 'success') {
   const container = document.getElementById('toastContainer');
   if (!container) return;
 
+  const activeToasts = Array.from(container.querySelectorAll('.toast:not(.toast-exit)'));
+  if (activeToasts.length >= 3) {
+    const excess = activeToasts.length - 2;
+    for (let i = 0; i < excess; i++) {
+      dismissToast(activeToasts[i]);
+    }
+  }
+
+  const allToasts = container.querySelectorAll('.toast');
+  if (allToasts.length > 5) {
+    for (let i = 0; i < allToasts.length - 3; i++) {
+      allToasts[i].remove();
+    }
+  }
+
   const toast = document.createElement('div');
   toast.className = `toast ${type === 'error' ? 'error' : ''}`;
   toast.innerHTML = message;
+  toast.title = 'Nhấn để đóng';
+  toast.addEventListener('click', () => dismissToast(toast));
+
   container.appendChild(toast);
 
-  // Tự xóa sau 3 giây
   setTimeout(() => {
-    toast.remove();
+    dismissToast(toast);
   }, 3000);
 }
 

@@ -898,104 +898,6 @@ input, select, textarea {
   z-index: 2;
 }
 
-/* Wishlist Button */
-.product-wishlist {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  color: var(--black);
-  z-index: 2;
-  transition: var(--transition-fast);
-  border: 1px solid rgba(0,0,0,0.06);
-}
-
-.product-wishlist:hover {
-  background: var(--white);
-  transform: scale(1.1);
-}
-
-.product-wishlist.active {
-  color: #e11d48 !important;
-  background: #ffffff;
-  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.2);
-}
-
-/* Wishlist Badge on Header */
-.wishlist-badge {
-  background: #e11d48 !important;
-}
-
-/* Detail Page Wishlist Button */
-.btn-wishlist-detail {
-  width: 100%;
-  padding: 15px;
-  background: #ffffff;
-  color: #0f172a;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 30px;
-  font-weight: 800;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.25s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.btn-wishlist-detail:hover {
-  border-color: #e11d48;
-  color: #e11d48;
-  background: #fff1f2;
-}
-
-.btn-wishlist-detail.active {
-  border-color: #e11d48;
-  background: #fff1f2;
-  color: #e11d48;
-}
-
-/* Wishlist Sidebar & Overlay */
-.wishlist-sidebar {
-  position: fixed;
-  top: 0;
-  right: -480px;
-  width: 440px;
-  height: 100vh;
-  background: var(--white);
-  border-left: 1px solid var(--gray-100);
-  z-index: 2001;
-  display: flex;
-  flex-direction: column;
-  transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-lg);
-}
-
-.wishlist-sidebar.open {
-  right: 0;
-}
-
-.wishlist-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 2000;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(4px);
-  display: none;
-}
-
-.wishlist-overlay.open {
-  display: block;
-}
 
 
 /* Size Chips – slide up on hover */
@@ -1711,11 +1613,14 @@ input, select, textarea {
 .toast-container {
   position: fixed;
   bottom: 24px;
-  right: 24px;
+  left: 24px;
+  right: auto;
   z-index: 9999;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  pointer-events: none;
+  max-width: calc(100vw - 48px);
 }
 
 .toast {
@@ -1726,25 +1631,62 @@ input, select, textarea {
   font-size: 0.88rem;
   font-weight: 600;
   min-width: 260px;
-  box-shadow: var(--shadow-md);
-  animation: slideInToast 0.3s ease;
+  max-width: 440px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  animation: slideInToast 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   align-items: center;
   gap: 10px;
+  pointer-events: auto;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s ease, opacity 0.25s ease;
+}
+
+.toast:hover {
+  transform: translateY(-2px);
 }
 
 .toast.error {
   background: var(--danger);
 }
 
+.toast.toast-exit {
+  animation: slideOutToast 0.25s ease forwards;
+  pointer-events: none;
+}
+
 @keyframes slideInToast {
   from {
     opacity: 0;
-    transform: translateX(40px);
+    transform: translateX(-40px);
   }
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+@keyframes slideOutToast {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+}
+
+@media (max-width: 600px) {
+  .toast-container {
+    left: 16px;
+    bottom: 16px;
+    right: 16px;
+  }
+  .toast {
+    min-width: 0;
+    width: 100%;
   }
 }
 
@@ -2816,33 +2758,6 @@ tr:hover td {
   box-shadow: 0 8px 24px rgba(79, 70, 229, 0.25);
 }
 
-.btn-wishlist-detail {
-  width: 100%;
-  padding: 14px;
-  background: #ffffff;
-  color: #0f172a;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 30px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-.btn-wishlist-detail:hover {
-  background: #fff1f2;
-  border-color: #f43f5e;
-  color: #e11d48;
-  transform: translateY(-1px);
-}
-.btn-wishlist-detail.active {
-  background: #ffe4e6;
-  border-color: #f43f5e;
-  color: #e11d48;
-}
 
 .detail-stock-badge.out-of-stock {
   background: #fee2e2;

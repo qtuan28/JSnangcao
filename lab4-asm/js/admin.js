@@ -44,14 +44,42 @@ function formatPrice(price) {
   return Number(price).toLocaleString('vi-VN') + '₫';
 }
 
-// ===== HIỆN TOAST =====
+// ===== HIỆN TOAST (Tối đa 3 thông báo cùng lúc) =====
+function dismissAdminToast(toast) {
+  if (!toast || toast.classList.contains('toast-exit')) return;
+  toast.classList.add('toast-exit');
+  setTimeout(() => {
+    toast.remove();
+  }, 250);
+}
+
 function showToast(message, type = 'success') {
   const container = document.getElementById('toastContainer');
+  if (!container) return;
+
+  const activeToasts = Array.from(container.querySelectorAll('.toast:not(.toast-exit)'));
+  if (activeToasts.length >= 3) {
+    const excess = activeToasts.length - 2;
+    for (let i = 0; i < excess; i++) {
+      dismissAdminToast(activeToasts[i]);
+    }
+  }
+
+  const allToasts = container.querySelectorAll('.toast');
+  if (allToasts.length > 5) {
+    for (let i = 0; i < allToasts.length - 3; i++) {
+      allToasts[i].remove();
+    }
+  }
+
   const toast = document.createElement('div');
   toast.className = `toast ${type === 'error' ? 'error' : ''}`;
   toast.innerHTML = message;
+  toast.title = 'Nhấn để đóng';
+  toast.addEventListener('click', () => dismissAdminToast(toast));
+
   container.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
+  setTimeout(() => dismissAdminToast(toast), 3000);
 }
 
 // ============================================================
