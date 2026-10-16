@@ -244,6 +244,8 @@ input, select, textarea {
   border: 1px solid #2e2e3d;
   transition: var(--transition-fast);
   position: relative;
+  cursor: pointer;
+  padding: 0;
 }
 
 .btn-round-action:hover {
@@ -251,6 +253,22 @@ input, select, textarea {
   border-color: #444455;
   color: #ffffff;
   transform: scale(1.05);
+}
+
+.cart-icon {
+  width: 19px;
+  height: 19px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+  transition: transform var(--transition-fast);
+}
+
+.btn-round-action:hover .cart-icon {
+  transform: scale(1.1);
 }
 
 .cart-badge {
