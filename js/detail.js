@@ -8,13 +8,13 @@ class Product {
   constructor(data) {
     this.id          = data.id;
     this.name        = data.name;
-    this.category    = data.category;
-    this.categoryId  = data.categoryId;
-    this.price       = Number(data.price);
-    this.stock       = data.stock;
-    this.image       = data.image;
-    this.description = data.description;
-    this.sizes       = data.sizes || [38, 39, 40, 41, 42];
+    this.category    = data.category || 'Giày Sneaker';
+    this.categoryId  = data.categoryId || 1;
+    this.price       = Number(data.price) || 0;
+    this.stock       = data.stock !== undefined ? Number(data.stock) : 10;
+    this.image       = data.image || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80';
+    this.description = data.description || 'Sản phẩm giày thể thao SneakerZone chính hãng, thiết kế hiện đại, êm ái tối đa.';
+    this.sizes       = Array.isArray(data.sizes) && data.sizes.length > 0 ? data.sizes : [38, 39, 40, 41, 42];
   }
 
   // Method trả về thông tin tóm tắt sản phẩm
@@ -35,65 +35,130 @@ function formatPrice(num) {
 
 // 3. ĐỌC DỮ LIỆU TỪ db.json (hoặc LOCAL_DB dự phòng)
 async function loadData() {
+  // 1. Kiểm tra dữ liệu do Admin lưu trong localStorage
   const saved = localStorage.getItem('adminData');
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      if (parsed.products && parsed.products.length > 0) return parsed;
-    } catch {}
+      if (parsed && Array.isArray(parsed.products) && parsed.products.length > 0) {
+        return parsed;
+      }
+    } catch (e) {
+      console.warn('Lỗi parse adminData:', e);
+    }
   }
 
-  try {
-    const res = await fetch('db.json');
-    if (!res.ok) throw new Error('Fetch failed');
-    return await res.json();
-  } catch (err) {
-    console.warn('Dùng dữ liệu dự phòng LOCAL_DB:', err);
-    if (typeof LOCAL_DB !== 'undefined') {
-      return LOCAL_DB;
+  // 2. Thử fetch từ db.json nếu đang chạy trên HTTP/HTTPS
+  if (typeof window !== 'undefined' && window.location && window.location.protocol && window.location.protocol.startsWith('http')) {
+    try {
+      const res = await fetch('db.json');
+      if (res.ok) {
+        const json = await res.json();
+        if (json && Array.isArray(json.products) && json.products.length > 0) {
+          return json;
+        }
+      }
+    } catch (err) {
+      console.warn('Không thể fetch db.json:', err);
     }
-    return { products: [], categories: [] };
   }
+
+  // 3. Fallback qua LOCAL_DB từ data.js
+  if (typeof LOCAL_DB !== 'undefined' && LOCAL_DB.products) {
+    return LOCAL_DB;
+  }
+  return { products: [], categories: [] };
 }
 
 // 4. LẤY ID TỪ URL BẰNG URLSearchParams VÀ KHỞI TẠO TRANG
 async function initProductDetail() {
-  // Lấy id từ query string trên URL: ?id=1
-  const urlParams = new URLSearchParams(window.location.search);
-  const productId = parseInt(urlParams.get('id')) || 1;
+  const container = document.getElementById('productDetailContainer');
+  try {
+    // Lấy id từ query string trên URL: ?id=1
+    const urlParams = new URLSearchParams(window.location.search);
+    const idParam = urlParams.get('id');
+    const targetId = idParam ? parseInt(idParam) : null;
 
-  // Tải danh sách sản phẩm
-  const data = await loadData();
-  const products = data.products || [];
+    // Tải danh sách sản phẩm
+    const data = await loadData();
+    const products = (data && Array.isArray(data.products)) ? data.products : [];
 
-  // Tìm sản phẩm khớp ID bằng phương thức find()
-  const rawProduct = products.find(p => p.id === productId);
+    if (products.length === 0) {
+      if (container) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 80px 20px;">
+            <h2 style="font-size: 1.8rem; margin-bottom: 12px; color: #0f172a;">Chưa có dữ liệu sản phẩm!</h2>
+            <p style="color: #64748b; margin-bottom: 24px;">Hệ thống đang chuẩn bị cập nhật sản phẩm mới.</p>
+            <a href="products.html" class="btn-primary" style="display:inline-block; padding: 12px 28px;">← Quay lại danh sách sản phẩm</a>
+          </div>`;
+      }
+      return;
+    }
 
-  if (!rawProduct) {
-    document.getElementById('productDetailContainer').innerHTML = `
-      <div style="text-align: center; padding: 80px 20px;">
-        <h2 style="font-size: 1.8rem; margin-bottom: 12px; color: #0f172a;">Không tìm thấy sản phẩm!</h2>
-        <p style="color: #64748b; margin-bottom: 24px;">Sản phẩm bạn đang tìm không tồn tại hoặc đã ngừng kinh doanh.</p>
-        <a href="products.html" class="btn-primary" style="display:inline-block; padding: 12px 28px;">← Quay lại danh sách sản phẩm</a>
-      </div>`;
-    return;
+    // Tìm sản phẩm theo ID (hỗ trợ cả number và string)
+    let rawProduct = null;
+    if (targetId !== null && !isNaN(targetId)) {
+      rawProduct = products.find(p => Number(p.id) === Number(targetId));
+    }
+
+    // Nếu không truyền id param (?id=) thì mặc định lấy sản phẩm đầu tiên
+    if (!rawProduct) {
+      if (!idParam) {
+        rawProduct = products[0];
+      } else {
+        if (container) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 80px 20px;">
+              <h2 style="font-size: 1.8rem; margin-bottom: 12px; color: #0f172a;">Không tìm thấy sản phẩm!</h2>
+              <p style="color: #64748b; margin-bottom: 24px;">Sản phẩm mã #${idParam} không tồn tại hoặc đã ngừng kinh doanh.</p>
+              <a href="products.html" class="btn-primary" style="display:inline-block; padding: 12px 28px;">← Quay lại danh sách sản phẩm</a>
+            </div>`;
+        }
+        return;
+      }
+    }
+
+    // Khởi tạo đối tượng Product từ Class OOP
+    currentProduct = new Product(rawProduct);
+    currentQuantity = 1;
+    selectedSize = (currentProduct.sizes && currentProduct.sizes.length > 0) ? currentProduct.sizes[0] : 40;
+
+    // Cập nhật tiêu đề trang và Breadcrumb an toàn
+    const pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) pageTitle.textContent = `${currentProduct.name} – SneakerZone`;
+    document.title = `${currentProduct.name} – SneakerZone`;
+
+    const breadcrumbCat = document.getElementById('breadcrumbCategory');
+    if (breadcrumbCat) {
+      breadcrumbCat.textContent = currentProduct.category || 'Giày Sneaker';
+      breadcrumbCat.href = `products.html?category=${encodeURIComponent(currentProduct.category || '')}`;
+    }
+
+    const breadcrumbName = document.getElementById('breadcrumbName');
+    if (breadcrumbName) {
+      breadcrumbName.textContent = currentProduct.name;
+    }
+
+    // Render giao diện chi tiết sản phẩm chính
+    renderDetailView(currentProduct);
+
+    // Render sản phẩm cùng danh mục liên quan (bọc riêng biệt để không ảnh hưởng chi tiết sản phẩm)
+    try {
+      renderRelatedProducts(products, currentProduct);
+    } catch (relErr) {
+      console.warn('Lỗi hiển thị sản phẩm liên quan:', relErr);
+    }
+  } catch (err) {
+    console.error('Lỗi render trang chi tiết sản phẩm:', err);
+    if (container) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 80px 20px;">
+          <h2 style="font-size: 1.8rem; margin-bottom: 12px; color: #ef4444;">Đã có lỗi xảy ra!</h2>
+          <p style="color: #64748b; margin-bottom: 24px;">Không thể tải chi tiết sản phẩm. Vui lòng thử lại sau.</p>
+          <a href="products.html" class="btn-primary" style="display:inline-block; padding: 12px 28px;">← Xem tất cả sản phẩm</a>
+        </div>`;
+    }
   }
-
-  // Khởi tạo đối tượng Product từ Class OOP
-  currentProduct = new Product(rawProduct);
-  selectedSize = currentProduct.sizes[0] || 40;
-
-  // Cập nhật tiêu đề trang và Breadcrumb
-  document.getElementById('pageTitle').textContent = `${currentProduct.name} – SneakerZone`;
-  document.getElementById('breadcrumbCategory').textContent = currentProduct.category;
-  document.getElementById('breadcrumbCategory').href = `products.html?category=${encodeURIComponent(currentProduct.category)}`;
-  document.getElementById('breadcrumbName').textContent = currentProduct.name;
-
-  // Render giao diện chi tiết sản phẩm
-  renderDetailView(currentProduct);
-
-  // Render sản phẩm cùng danh mục liên quan
-  renderRelatedProducts(products, currentProduct);
 }
 
 // 5. HIỂN THỊ CHI TIẾT SẢN PHẨM RA DOM
@@ -101,9 +166,12 @@ function renderDetailView(product) {
   const container = document.getElementById('productDetailContainer');
   if (!container) return;
 
+  const isOutOfStock = product.stock <= 0;
+  const isWishlisted = (typeof wishlist !== 'undefined' && wishlist.has(product.id));
+
   // Tạo danh sách nút chọn Size
   const sizesHtml = product.sizes.map(size => `
-    <button class="detail-size-btn ${size === selectedSize ? 'active' : ''}" onclick="selectDetailSize(this, ${size})">
+    <button type="button" class="detail-size-btn ${size === selectedSize ? 'active' : ''}" onclick="selectDetailSize(this, ${size})">
       ${size}
     </button>
   `).join('');
@@ -123,7 +191,7 @@ function renderDetailView(product) {
         <!-- Thumbnail góc nhìn nhỏ -->
         <div class="detail-thumbs">
           <div class="detail-thumb active" onclick="changeMainImage('${product.image}', this)">
-            <img src="${product.image}" alt="${product.name}" />
+            <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80'" />
           </div>
           <div class="detail-thumb" onclick="changeMainImage('https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80', this)">
             <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80" alt="Góc chụp 2" />
@@ -141,7 +209,9 @@ function renderDetailView(product) {
 
         <div class="detail-price-stock">
           <span class="detail-price">${formatPrice(product.price)}</span>
-          <span class="detail-stock-badge">${product.stock > 0 ? `Còn hàng (${product.stock} đôi)` : 'Tạm hết hàng'}</span>
+          <span class="detail-stock-badge ${isOutOfStock ? 'out-of-stock' : ''}">
+            ${!isOutOfStock ? `Còn hàng (${product.stock} đôi)` : 'Tạm hết hàng'}
+          </span>
         </div>
 
         <div class="detail-desc">
@@ -163,26 +233,29 @@ function renderDetailView(product) {
         </div>
         <div class="detail-qty-wrap">
           <div class="detail-qty-control">
-            <button class="detail-qty-btn" onclick="updateQty(-1)">−</button>
-            <input type="text" id="qtyInput" class="detail-qty-input" value="1" readonly />
-            <button class="detail-qty-btn" onclick="updateQty(1)">+</button>
+            <button type="button" class="detail-qty-btn" onclick="updateQty(-1)" ${isOutOfStock ? 'disabled' : ''}>−</button>
+            <input type="text" id="qtyInput" class="detail-qty-input" value="${isOutOfStock ? 0 : 1}" readonly />
+            <button type="button" class="detail-qty-btn" onclick="updateQty(1)" ${isOutOfStock ? 'disabled' : ''}>+</button>
           </div>
-          <span style="font-size:0.9rem; color:#64748b;">Tối đa ${product.stock} đôi</span>
+          <span style="font-size:0.9rem; color:#64748b;">
+            ${isOutOfStock ? 'Sản phẩm tạm thời hết hàng' : `Tối đa ${product.stock} đôi`}
+          </span>
         </div>
 
         <!-- Nút Đặt Mua & Yêu Thích -->
         <div class="detail-actions">
-          <button class="btn-add-detail" onclick="handleAddToCart()">
+          <button type="button" class="btn-add-detail" onclick="handleAddToCart()" ${isOutOfStock ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
             + Thêm vào túi đồ
           </button>
-          <button class="btn-buy-now" onclick="handleBuyNow()">
+          <button type="button" class="btn-buy-now" onclick="handleBuyNow()" ${isOutOfStock ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>
             Mua ngay
           </button>
-          <button class="btn-wishlist-detail ${typeof wishlist !== 'undefined' && wishlist.has(product.id) ? 'active' : ''}" 
+          <button type="button" 
+                  class="btn-wishlist-detail ${isWishlisted ? 'active' : ''}" 
                   id="btnDetailWishlist" 
                   data-product-id="${product.id}"
                   onclick="handleToggleDetailWishlist()">
-            ${typeof wishlist !== 'undefined' && wishlist.has(product.id) ? '♥ Đã thêm vào mục Yêu thích' : '♡ Thêm vào mục Yêu thích'}
+            ${isWishlisted ? '♥ Đã thêm vào mục Yêu thích' : '♡ Thêm vào mục Yêu thích'}
           </button>
         </div>
 
@@ -208,9 +281,9 @@ function renderDetailView(product) {
 
 // 6. CHỌN SIZE & THAY ĐỔI ẢNH & SỐ LƯỢNG
 function selectDetailSize(btn, size) {
-  selectedSize = size;
+  selectedSize = Number(size);
   document.querySelectorAll('.detail-size-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
 }
 
 function changeMainImage(url, thumbEl) {
@@ -218,24 +291,29 @@ function changeMainImage(url, thumbEl) {
   if (mainImg) mainImg.src = url;
 
   document.querySelectorAll('.detail-thumb').forEach(t => t.classList.remove('active'));
-  thumbEl.classList.add('active');
+  if (thumbEl) thumbEl.classList.add('active');
 }
 
 function updateQty(delta) {
-  if (!currentProduct) return;
+  if (!currentProduct || currentProduct.stock <= 0) return;
   const newQty = currentQuantity + delta;
   if (newQty >= 1 && newQty <= currentProduct.stock) {
     currentQuantity = newQty;
-    document.getElementById('qtyInput').value = currentQuantity;
+    const input = document.getElementById('qtyInput');
+    if (input) input.value = currentQuantity;
   }
 }
 
 // 7. THÊM VÀO GIỎ HÀNG TỪ TRANG CHI TIẾT
 function handleAddToCart() {
   if (!currentProduct) return;
+  if (currentProduct.stock <= 0) {
+    showToast('Sản phẩm này hiện đang tạm hết hàng!', 'error');
+    return;
+  }
 
-  // Gọi phương thức addToCart của đối tượng cart với tham số số lượng (Default Parameter quantity)
-  cart.addToCart(currentProduct, currentQuantity);
+  // Thêm vào giỏ hàng với thông tin size đã chọn
+  cart.addToCart(currentProduct, currentQuantity, selectedSize);
 
   // Cập nhật lại giao diện giỏ hàng
   renderCart();
@@ -244,6 +322,10 @@ function handleAddToCart() {
 
 // Mua ngay: Thêm vào giỏ và mở luôn sidebar giỏ hàng
 function handleBuyNow() {
+  if (!currentProduct || currentProduct.stock <= 0) {
+    showToast('Sản phẩm này hiện đang tạm hết hàng!', 'error');
+    return;
+  }
   handleAddToCart();
   const sidebar = document.getElementById('cartSidebar');
   const overlay = document.getElementById('cartOverlay');
@@ -256,6 +338,8 @@ function handleBuyNow() {
 // Toggle Yêu thích từ trang chi tiết
 function handleToggleDetailWishlist() {
   if (!currentProduct) return;
+  if (typeof wishlist === 'undefined') return;
+
   const isAdded = wishlist.toggle(currentProduct);
   const btn = document.getElementById('btnDetailWishlist');
   if (btn) {
@@ -267,9 +351,10 @@ function handleToggleDetailWishlist() {
       btn.innerHTML = '♡ Thêm vào mục Yêu thích';
     }
   }
-  updateWishlistBadge();
-  syncWishlistButtons(currentProduct.id, isAdded);
-  renderWishlist();
+
+  if (typeof updateWishlistBadge === 'function') updateWishlistBadge();
+  if (typeof syncWishlistButtons === 'function') syncWishlistButtons(currentProduct.id, isAdded);
+  if (typeof renderWishlist === 'function') renderWishlist();
 
   if (isAdded) {
     showToast(`Đã thêm "${currentProduct.name}" vào mục Yêu thích!`);
@@ -285,9 +370,19 @@ function renderRelatedProducts(allProducts, product) {
   if (!container || !section) return;
 
   // Lọc các sản phẩm cùng category, loại trừ chính sản phẩm đang xem
-  const related = allProducts
-    .filter(p => p.category === product.category && p.id !== product.id)
-    .slice(0, 4);
+  let related = allProducts.filter(p => 
+    p.category === product.category && Number(p.id) !== Number(product.id)
+  );
+
+  // Nếu cùng category có ít hơn 4 sản phẩm, bổ sung các mẫu khác
+  if (related.length < 4) {
+    const others = allProducts.filter(p => 
+      Number(p.id) !== Number(product.id) && !related.some(r => Number(r.id) === Number(p.id))
+    );
+    related = related.concat(others);
+  }
+
+  related = related.slice(0, 4);
 
   if (related.length === 0) {
     section.style.display = 'none';
@@ -295,37 +390,37 @@ function renderRelatedProducts(allProducts, product) {
   }
 
   section.style.display = 'block';
-  container.innerHTML = '';
-
+  
+  let html = '';
   related.forEach(item => {
     const isFav = typeof wishlist !== 'undefined' && wishlist.has(item.id);
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.innerHTML = `
-      <div class="product-image-wrap" onclick="location.href='detail.html?id=${item.id}'">
-        <img src="${item.image}" alt="${item.name}" loading="lazy" />
-        <span class="product-badge">${item.category}</span>
-        <button class="product-wishlist ${isFav ? 'active' : ''}" 
-                data-product-id="${item.id}"
-                style="${isFav ? 'color:#e11d48;' : ''}"
-                title="${isFav ? 'Bỏ yêu thích' : 'Yêu thích'}" 
-                onclick="event.stopPropagation(); toggleWishlistProduct(${JSON.stringify(item).replace(/"/g, '&quot;')}, this)">
-          ${isFav ? '♥' : '♡'}
-        </button>
-      </div>
-      <div class="product-info">
-        <div class="product-category">${item.category}</div>
-        <h3 class="product-name" onclick="location.href='detail.html?id=${item.id}'" style="cursor:pointer">${item.name}</h3>
-        <div class="product-footer">
-          <div class="product-price">${formatPrice(item.price)}</div>
-          <button class="btn-add-cart" onclick="event.stopPropagation(); quickAddRelated(${JSON.stringify(item).replace(/"/g, '&quot;')})">
-            + Thêm
+    html += `
+      <div class="product-card">
+        <div class="product-image-wrap" onclick="location.href='detail.html?id=${item.id}'">
+          <img src="${item.image}" alt="${item.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80'" />
+          <span class="product-badge">${item.category}</span>
+          <button type="button" class="product-wishlist ${isFav ? 'active' : ''}" 
+                  data-product-id="${item.id}"
+                  style="${isFav ? 'color:#e11d48;' : ''}"
+                  title="${isFav ? 'Bỏ yêu thích' : 'Yêu thích'}" 
+                  onclick="event.stopPropagation(); toggleWishlistProduct(${JSON.stringify(item).replace(/"/g, '&quot;')}, this)">
+            ${isFav ? '♥' : '♡'}
           </button>
+        </div>
+        <div class="product-info">
+          <div class="product-category">${item.category}</div>
+          <h3 class="product-name" onclick="location.href='detail.html?id=${item.id}'" style="cursor:pointer">${item.name}</h3>
+          <div class="product-footer">
+            <div class="product-price">${formatPrice(item.price)}</div>
+            <button type="button" class="btn-add-cart" onclick="event.stopPropagation(); quickAddRelated(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+              + Thêm
+            </button>
+          </div>
         </div>
       </div>
     `;
-    container.appendChild(card);
   });
+  container.innerHTML = html;
 
   if (typeof syncAllWishlistButtons === 'function') {
     syncAllWishlistButtons();
@@ -346,10 +441,26 @@ window.handleAddToCart            = handleAddToCart;
 window.handleBuyNow               = handleBuyNow;
 window.handleToggleDetailWishlist = handleToggleDetailWishlist;
 window.quickAddRelated            = quickAddRelated;
-window.toggleWishlist             = toggleWishlistProduct;
+window.getCurrentProduct          = () => currentProduct;
+if (typeof toggleWishlistProduct !== 'undefined') {
+  window.toggleWishlist = toggleWishlistProduct;
+}
 
+// Thiết lập ô tìm kiếm trên Header
+function setupDetailHeaderSearch() {
+  const searchInput = document.getElementById('headerSearchInput');
+  if (searchInput) {
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const q = searchInput.value.trim();
+        if (q) window.location.href = `products.html?search=${encodeURIComponent(q)}`;
+      }
+    });
+  }
+}
 
 // Tự động chạy khi tải xong trang
 document.addEventListener('DOMContentLoaded', () => {
+  setupDetailHeaderSearch();
   initProductDetail();
 });

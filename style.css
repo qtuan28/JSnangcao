@@ -2816,6 +2816,39 @@ tr:hover td {
   box-shadow: 0 8px 24px rgba(79, 70, 229, 0.25);
 }
 
+.btn-wishlist-detail {
+  width: 100%;
+  padding: 14px;
+  background: #ffffff;
+  color: #0f172a;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-wishlist-detail:hover {
+  background: #fff1f2;
+  border-color: #f43f5e;
+  color: #e11d48;
+  transform: translateY(-1px);
+}
+.btn-wishlist-detail.active {
+  background: #ffe4e6;
+  border-color: #f43f5e;
+  color: #e11d48;
+}
+
+.detail-stock-badge.out-of-stock {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
 /* Perks */
 .detail-perks {
   border-top: 1px solid #e2e8f0;

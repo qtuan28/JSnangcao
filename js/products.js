@@ -86,7 +86,7 @@ async function loadData() {
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      if (parsed.products && parsed.products.length >= 28) {
+      if (Array.isArray(parsed.products) && parsed.products.length > 0) {
         return parsed;
       }
     } catch {}

@@ -4,14 +4,18 @@
 // ============================================================
 
 // ===== KIỂM TRA QUYỀN ADMIN =====
-const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
 if (!currentUser || currentUser.role !== 'admin') {
-  alert('Ban khong co quyen truy cap trang nay!');
+  alert('Bạn không có quyền truy cập trang quản trị! Vui lòng đăng nhập với tài khoản Admin.');
   window.location.href = 'login.html';
+  throw new Error('Chưa đăng nhập quyền Admin');
 }
 
 // Hiện tên admin
-document.getElementById('adminWelcome').textContent = `Xin chào, ${currentUser.name}`;
+const adminWelcomeEl = document.getElementById('adminWelcome');
+if (adminWelcomeEl && currentUser) {
+  adminWelcomeEl.textContent = `Xin chào, ${currentUser.name}`;
+}
 
 // ===== CLASS USER / CUSTOMER (OOP - WEB2064) =====
 class User {
@@ -55,12 +59,13 @@ async function loadData() {
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      if (parsed.products && parsed.products.length >= initialProducts.length) {
+      if (Array.isArray(parsed.products) && parsed.products.length > 0) {
         products   = parsed.products;
-        categories = parsed.categories || initialCategories;
+        categories = (Array.isArray(parsed.categories) && parsed.categories.length > 0) ? parsed.categories : initialCategories;
       }
     } catch {}
   }
+
 
   if (products.length === 0) products = [...initialProducts];
   if (categories.length === 0) categories = [...initialCategories];
@@ -301,12 +306,17 @@ document.getElementById('productForm').addEventListener('submit', function (e) {
   const category    = document.getElementById('productCategory').value;
   const price       = Number(document.getElementById('productPrice').value);
   const stock       = Number(document.getElementById('productStock').value);
-  const image       = document.getElementById('productImage').value.trim();
+  let image         = document.getElementById('productImage').value.trim();
   const description = document.getElementById('productDescription').value.trim();
 
-  if (!name || !price || !stock) {
-    showToast('Vui lòng điền đầy đủ thông tin!', 'error');
+  // Cho phép stock = 0 (hết hàng), chỉ từ chối khi giá <= 0 hoặc stock < 0 hoặc NaN
+  if (!name || isNaN(price) || price <= 0 || isNaN(stock) || stock < 0) {
+    showToast('Vui lòng điền đúng thông tin (giá > 0 và tồn kho >= 0)!', 'error');
     return;
+  }
+
+  if (!image) {
+    image = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80';
   }
 
   if (id) {
@@ -386,7 +396,14 @@ function editCategory(id) {
 
 // XÓA danh mục
 function deleteCategory(id) {
-  if (!confirm('Bạn chắc chắn muốn xóa danh mục này?')) return;
+  const cat = categories.find(c => c.id === id);
+  if (!cat) return;
+  const count = products.filter(p => p.category === cat.name).length;
+  if (count > 0) {
+    if (!confirm(`Danh mục "${cat.name}" đang có ${count} sản phẩm. Bạn có chắc chắn muốn xóa danh mục này?`)) return;
+  } else {
+    if (!confirm(`Bạn chắc chắn muốn xóa danh mục "${cat.name}"?`)) return;
+  }
   categories = categories.filter(c => c.id !== id);
   saveData();
   renderCategoriesTable();
@@ -410,7 +427,16 @@ document.getElementById('categoryForm').addEventListener('submit', function (e) 
   if (id) {
     // === SỬA ===
     const index = categories.findIndex(c => c.id === Number(id));
-    if (index !== -1) categories[index] = { ...categories[index], name, icon };
+    if (index !== -1) {
+      const oldName = categories[index].name;
+      categories[index] = { ...categories[index], name, icon };
+      // Đồng bộ tên danh mục mới cho các sản phẩm đang thuộc danh mục này
+      products.forEach(p => {
+        if (p.category === oldName) {
+          p.category = name;
+        }
+      });
+    }
     showToast('Cập nhật danh mục thành công!');
   } else {
     // === THÊM MỚI ===
@@ -454,6 +480,7 @@ function renderCustomersTable(list = users) {
       </td>
       <td>
         <button class="btn-edit" onclick="editCustomer(${u.id})">Sửa</button>
+        <button class="btn-delete" onclick="deleteCustomer(${u.id})" style="margin-left:6px">Xóa</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -491,6 +518,25 @@ function editCustomer(id) {
   openModal('customerModal');
 }
 
+// Xóa tài khoản người dùng
+function deleteCustomer(id) {
+  const user = users.find(u => u.id === id);
+  if (!user) return;
+
+  if (currentUser && user.id === currentUser.id) {
+    showToast('Không thể xóa tài khoản Admin đang đăng nhập!', 'error');
+    return;
+  }
+
+  if (!confirm(`Bạn chắc chắn muốn xóa tài khoản "${user.name}" (${user.email})?`)) return;
+
+  users = users.filter(u => u.id !== id);
+  saveData();
+  renderCustomersTable();
+  renderDashboard();
+  showToast('Đã xóa tài khoản thành công!');
+}
+
 // XỬ LÝ SUBMIT FORM TÀI KHOẢN (Thêm / Sửa)
 document.getElementById('customerForm').addEventListener('submit', function (e) {
   e.preventDefault();
@@ -518,6 +564,12 @@ document.getElementById('customerForm').addEventListener('submit', function (e) 
     // === SỬA TÀI KHOẢN ===
     const index = users.findIndex(u => u.id === Number(id));
     if (index !== -1) {
+      // Kiểm tra trùng email với tài khoản khác
+      const emailExists = users.some(u => u.id !== Number(id) && u.email.toLowerCase() === email.toLowerCase());
+      if (emailExists) {
+        showToast('Email này đã được dùng bởi tài khoản khác!', 'error');
+        return;
+      }
       users[index].name  = name;
       users[index].email = email;
       users[index].phone = phone;
@@ -563,8 +615,14 @@ document.getElementById('searchCustomers').addEventListener('input', function ()
   renderCustomersTable(filtered);
 });
 
-// Gắn hàm edit ra window để onclick trong thẻ html nhận được
-window.editCustomer = editCustomer;
+// ============================================================
+// ĐĂNG XUẤT ADMIN
+// ============================================================
+function logout() {
+  localStorage.removeItem('currentUser');
+  showToast('Đã đăng xuất thành công!');
+  setTimeout(() => { window.location.href = 'login.html'; }, 500);
+}
 
 // ============================================================
 // HELPER MỞ / ĐÓNG MODAL
@@ -576,6 +634,27 @@ function openModal(modalId) {
 function closeModal(modalId) {
   document.getElementById(modalId).classList.remove('open');
 }
+
+// ============================================================
+// GẮN CÁC HÀM TOÀN CỤC RA WINDOW CHO SỰ KIỆN HTML ONCLICK
+// ============================================================
+window.showTab               = showTab;
+window.renderDashboard       = renderDashboard;
+window.renderProductsTable   = renderProductsTable;
+window.renderCategoriesTable = renderCategoriesTable;
+window.renderCustomersTable  = renderCustomersTable;
+window.openAddProductModal   = openAddProductModal;
+window.editProduct           = editProduct;
+window.deleteProduct         = deleteProduct;
+window.openAddCategoryModal  = openAddCategoryModal;
+window.editCategory          = editCategory;
+window.deleteCategory        = deleteCategory;
+window.openAddCustomerModal  = openAddCustomerModal;
+window.editCustomer          = editCustomer;
+window.deleteCustomer        = deleteCustomer;
+window.openModal             = openModal;
+window.closeModal            = closeModal;
+window.logout                = logout;
 
 // ============================================================
 // GẮN SỰ KIỆN NÚT
@@ -605,3 +684,4 @@ async function init() {
 }
 
 init();
+

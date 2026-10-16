@@ -15,11 +15,12 @@
       <div class="logo-text">Sneaker<span>Zone</span></div>
     </div>
     <nav class="sidebar-nav">
-      <a href="#" class="active" id="navDashboard" onclick="showTab('dashboard')">Dashboard</a>
-      <a href="#" id="navProducts" onclick="showTab('products')">Sản phẩm</a>
-      <a href="#" id="navCategories" onclick="showTab('categories')">Danh mục</a>
-      <a href="#" id="navCustomers" onclick="showTab('customers')">Tài khoản khách hàng</a>
+      <a href="#" class="active" id="navDashboard" onclick="showTab('dashboard'); return false;">Dashboard</a>
+      <a href="#" id="navProducts" onclick="showTab('products'); return false;">Sản phẩm</a>
+      <a href="#" id="navCategories" onclick="showTab('categories'); return false;">Danh mục</a>
+      <a href="#" id="navCustomers" onclick="showTab('customers'); return false;">Tài khoản khách hàng</a>
       <a href="index.html" style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px;">Về trang chủ</a>
+      <a href="#" onclick="logout(); return false;" style="color: #ef4444; font-weight: 700;">Đăng xuất</a>
     </nav>
   </aside>
 

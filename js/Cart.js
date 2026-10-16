@@ -259,9 +259,295 @@ function setupCartUI() {
 }
 
 function closeCart() {
-  document.getElementById('cartSidebar').classList.remove('open');
-  document.getElementById('cartOverlay').classList.remove('open');
+  const sidebar = document.getElementById('cartSidebar');
+  const overlay = document.getElementById('cartOverlay');
+  if (sidebar) sidebar.classList.remove('open');
+  if (overlay) overlay.classList.remove('open');
 }
+
+// ============================================================
+// Wishlist Functions – Giao diện & Tương tác danh sách yêu thích
+// ============================================================
+
+// Cập nhật số lượng trên badge yêu thích
+function updateWishlistBadge() {
+  if (typeof wishlist === 'undefined') return;
+  const count = wishlist.getCount();
+  const badges = document.querySelectorAll('#wishlistBadge, .wishlist-badge');
+  badges.forEach(b => {
+    b.textContent = count;
+  });
+  const headerCount = document.getElementById('wishlistCountHeader');
+  if (headerCount) headerCount.textContent = count;
+}
+
+// Render danh sách sản phẩm yêu thích ra Wishlist Sidebar
+function renderWishlist() {
+  if (typeof wishlist === 'undefined') return;
+  updateWishlistBadge();
+  const container = document.getElementById('wishlistItemsContainer');
+  const footer = document.getElementById('wishlistFooter');
+
+  if (!container) return;
+
+  if (wishlist.items.length === 0) {
+    container.innerHTML = `
+      <div class="cart-empty">
+        <p style="font-size: 2.5rem; margin-bottom: 8px; color: var(--gray-300);">♡</p>
+        <p style="font-size: 1.05rem; color: var(--gray-800); font-weight:700; margin-bottom: 6px;">Mục yêu thích đang trống</p>
+        <p style="font-size: 0.85rem; color: var(--gray-500); margin-bottom: 18px;">Hãy bấm biểu tượng trái tim ở các đôi giày bạn yêu thích để lưu lại.</p>
+        <a href="products.html" class="btn-nike-solid" style="padding: 10px 22px; font-size: 0.85rem; text-decoration:none; display:inline-flex;">Khám phá sản phẩm ngay</a>
+      </div>`;
+    if (footer) footer.style.display = 'none';
+    return;
+  }
+
+  let html = '';
+  wishlist.items.forEach(item => {
+    html += `
+      <div class="cart-item wishlist-item" id="wishlist-item-${item.id}">
+        <img src="${item.image}" alt="${item.name}" 
+             onclick="location.href='detail.html?id=${item.id}'" 
+             style="cursor:pointer"
+             onerror="this.src='https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80'" />
+        <div class="cart-item-info">
+          <div class="cart-item-name" onclick="location.href='detail.html?id=${item.id}'" style="cursor:pointer" title="Xem chi tiết">${item.name}</div>
+          <div class="cart-item-price">${formatPrice(item.price)}</div>
+          <div style="font-size:0.75rem; color:var(--gray-500); margin-top:2px;">${item.category || 'Giày Sneaker'}</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+          <button class="btn-primary" style="padding:6px 14px; font-size:0.75rem; border-radius:var(--radius-pill); white-space:nowrap;" onclick="wishlistMoveToCart(${item.id})">
+            + Thêm giỏ
+          </button>
+          <button class="btn-remove-cart" title="Xóa khỏi yêu thích" onclick="removeFromWishlist(${item.id})">
+            ✕ Xóa
+          </button>
+        </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+  if (footer) footer.style.display = 'block';
+}
+
+// Xóa sản phẩm khỏi danh sách yêu thích
+function removeFromWishlist(productId) {
+  if (typeof wishlist === 'undefined') return;
+  const pId = Number(productId);
+  const item = wishlist.items.find(i => Number(i.id) === pId);
+  const itemName = item ? item.name : 'Sản phẩm';
+  wishlist.remove(pId);
+  renderWishlist();
+  syncWishlistButtons(pId, false);
+  showToast(`Đã xóa "${itemName}" khỏi mục Yêu thích`, 'error');
+}
+
+// Chuyển / thêm sản phẩm từ mục yêu thích sang giỏ hàng
+function wishlistMoveToCart(productId) {
+  if (typeof wishlist === 'undefined') return;
+  const pId = Number(productId);
+  const item = wishlist.items.find(i => Number(i.id) === pId);
+  if (!item) return;
+  cart.addToCart(item);
+  renderCart();
+  showToast(`Đã thêm "${item.name}" vào giỏ hàng!`);
+}
+
+// Xóa toàn bộ danh sách yêu thích
+function clearAllWishlist() {
+  if (typeof wishlist === 'undefined' || wishlist.items.length === 0) return;
+  wishlist.clear();
+  renderWishlist();
+  syncAllWishlistButtons();
+  showToast('Đã xóa tất cả sản phẩm khỏi mục Yêu thích', 'error');
+}
+
+// Thêm tất cả sản phẩm yêu thích vào giỏ hàng
+function addAllWishlistToCart() {
+  if (typeof wishlist === 'undefined' || wishlist.items.length === 0) return;
+  wishlist.items.forEach(item => {
+    cart.addToCart(item);
+  });
+  renderCart();
+  showToast(`Đã thêm tất cả ${wishlist.items.length} sản phẩm yêu thích vào giỏ hàng!`);
+}
+
+// Đồng bộ trạng thái các nút trái tim theo productId trên toàn trang
+function syncWishlistButtons(productId, isWishlisted) {
+  const pId = Number(productId);
+  const buttons = document.querySelectorAll(`[data-product-id="${pId}"]`);
+  buttons.forEach(btn => {
+    if (btn.id === 'btnDetailWishlist') {
+      if (isWishlisted) {
+        btn.classList.add('active');
+        btn.innerHTML = '♥ Đã thêm vào mục Yêu thích';
+      } else {
+        btn.classList.remove('active');
+        btn.innerHTML = '♡ Thêm vào mục Yêu thích';
+      }
+    } else {
+      if (isWishlisted) {
+        btn.classList.add('active');
+        btn.textContent = '♥';
+        btn.style.color = '#e11d48';
+        btn.setAttribute('title', 'Bỏ yêu thích');
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = '♡';
+        btn.style.color = '';
+        btn.setAttribute('title', 'Thêm vào yêu thích');
+      }
+    }
+  });
+  updateWishlistBadge();
+}
+
+// Quét toàn bộ nút trên trang để gán đúng icon ♥ hoặc ♡ dựa trên dữ liệu đã lưu
+function syncAllWishlistButtons() {
+  if (typeof wishlist === 'undefined') return;
+  document.querySelectorAll('.product-wishlist[data-product-id]').forEach(btn => {
+    const id = Number(btn.getAttribute('data-product-id'));
+    const isFav = wishlist.has(id);
+    if (isFav) {
+      btn.classList.add('active');
+      btn.textContent = '♥';
+      btn.style.color = '#e11d48';
+      btn.setAttribute('title', 'Bỏ yêu thích');
+    } else {
+      btn.classList.remove('active');
+      btn.textContent = '♡';
+      btn.style.color = '';
+      btn.setAttribute('title', 'Thêm vào yêu thích');
+    }
+  });
+
+  const detailBtn = document.getElementById('btnDetailWishlist');
+  if (detailBtn && detailBtn.getAttribute('data-product-id')) {
+    const id = Number(detailBtn.getAttribute('data-product-id'));
+    const isFav = wishlist.has(id);
+    if (isFav) {
+      detailBtn.classList.add('active');
+      detailBtn.innerHTML = '♥ Đã thêm vào mục Yêu thích';
+    } else {
+      detailBtn.classList.remove('active');
+      detailBtn.innerHTML = '♡ Thêm vào mục Yêu thích';
+    }
+  }
+
+  updateWishlistBadge();
+}
+
+// Hàm toggle chung khi click nút yêu thích trên sản phẩm
+function toggleWishlistProduct(product, btnEl) {
+  if (!product || !product.id) return;
+  if (typeof wishlist === 'undefined') return;
+  const isAdded = wishlist.toggle(product);
+  syncWishlistButtons(product.id, isAdded);
+  renderWishlist();
+
+  if (isAdded) {
+    showToast(`Đã thêm "${product.name}" vào mục Yêu thích!`);
+  } else {
+    showToast(`Đã xóa "${product.name}" khỏi mục Yêu thích`, 'error');
+  }
+}
+
+// Tự động kiểm tra và chèn cấu trúc DOM Wishlist Sidebar nếu trang chưa có
+function ensureWishlistDOM() {
+  if (!document.getElementById('wishlistSidebar')) {
+    const overlay = document.createElement('div');
+    overlay.className = 'cart-overlay wishlist-overlay';
+    overlay.id = 'wishlistOverlay';
+
+    const sidebar = document.createElement('aside');
+    sidebar.className = 'cart-sidebar wishlist-sidebar';
+    sidebar.id = 'wishlistSidebar';
+    sidebar.innerHTML = `
+      <div class="cart-header">
+        <h3>Mục yêu thích (<span id="wishlistCountHeader">0</span>)</h3>
+        <button class="btn-close-cart" id="btnCloseWishlist" title="Đóng">✕</button>
+      </div>
+      <div class="cart-items" id="wishlistItemsContainer"></div>
+      <div class="cart-footer" id="wishlistFooter" style="display:none;">
+        <button class="btn-primary" id="btnAddAllWishlistToCart" style="width:100%; justify-content:center; padding:14px; margin-bottom:10px;">
+          + Thêm tất cả vào giỏ hàng
+        </button>
+        <button class="btn-clear-wishlist" id="btnClearWishlist" style="width:100%; padding:10px; background:transparent; border:1px solid var(--gray-200); border-radius:var(--radius-pill); font-weight:700; color:var(--gray-600); cursor:pointer;">
+          Xóa tất cả yêu thích
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(sidebar);
+  }
+}
+
+function openWishlist() {
+  closeCart();
+  ensureWishlistDOM();
+  const sidebar = document.getElementById('wishlistSidebar');
+  const overlay = document.getElementById('wishlistOverlay');
+  if (sidebar && overlay) {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    renderWishlist();
+  }
+}
+
+function closeWishlist() {
+  const sidebar = document.getElementById('wishlistSidebar');
+  const overlay = document.getElementById('wishlistOverlay');
+  if (sidebar) sidebar.classList.remove('open');
+  if (overlay) overlay.classList.remove('open');
+}
+
+// Thiết lập sự kiện UI cho Wishlist
+function setupWishlistUI() {
+  ensureWishlistDOM();
+
+  // Bắt sự kiện click vào nút Wishlist trên Header
+  const btnOpen = document.getElementById('btnOpenWishlist');
+  if (btnOpen) {
+    btnOpen.removeAttribute('onclick');
+    btnOpen.addEventListener('click', (e) => {
+      e.preventDefault();
+      openWishlist();
+    });
+  }
+
+  // Nút đóng và overlay
+  const btnClose = document.getElementById('btnCloseWishlist');
+  const overlay = document.getElementById('wishlistOverlay');
+  if (btnClose) btnClose.addEventListener('click', closeWishlist);
+  if (overlay) overlay.addEventListener('click', closeWishlist);
+
+  // Nút thêm tất cả vào giỏ
+  const btnAddAll = document.getElementById('btnAddAllWishlistToCart');
+  if (btnAddAll) {
+    btnAddAll.addEventListener('click', addAllWishlistToCart);
+  }
+
+  // Nút xóa tất cả
+  const btnClearAll = document.getElementById('btnClearWishlist');
+  if (btnClearAll) {
+    btnClearAll.addEventListener('click', clearAllWishlist);
+  }
+}
+
+// Gắn toàn bộ hàm cần dùng ra window để gọi từ bất kỳ đâu
+window.renderWishlist = renderWishlist;
+window.updateWishlistBadge = updateWishlistBadge;
+window.openWishlist = openWishlist;
+window.closeWishlist = closeWishlist;
+window.removeFromWishlist = removeFromWishlist;
+window.wishlistMoveToCart = wishlistMoveToCart;
+window.clearAllWishlist = clearAllWishlist;
+window.addAllWishlistToCart = addAllWishlistToCart;
+window.syncWishlistButtons = syncWishlistButtons;
+window.syncAllWishlistButtons = syncAllWishlistButtons;
+window.toggleWishlistProduct = toggleWishlistProduct;
+
 
 // Nút "Thanh toán ngay" trong Cart Sidebar → sang trang giỏ hàng
 function setupCheckout() {
