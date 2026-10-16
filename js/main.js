@@ -100,6 +100,8 @@ function renderProducts(products, containerId = 'featuredProductsContainer') {
 
     const badgeText = product.price > 4000000 ? 'Độc quyền' : (product.id <= 2 ? 'Mới ra mắt' : 'Bán chạy');
 
+    const isFav = typeof wishlist !== 'undefined' && wishlist.has(product.id);
+
     const card = document.createElement('div');
     card.className = 'product-card';
     card.innerHTML = `
@@ -109,7 +111,13 @@ function renderProducts(products, containerId = 'featuredProductsContainer') {
              loading="lazy"
              onerror="this.src='https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80'" />
         <span class="product-badge">${badgeText}</span>
-        <button class="product-wishlist" title="Yêu thích" onclick="toggleWishlist(this, event)">♡</button>
+        <button class="product-wishlist ${isFav ? 'active' : ''}" 
+                data-product-id="${product.id}" 
+                title="${isFav ? 'Bỏ yêu thích' : 'Yêu thích'}" 
+                style="${isFav ? 'color:#e11d48;' : ''}" 
+                onclick="event.stopPropagation(); toggleWishlistProduct(${JSON.stringify(data).replace(/"/g, '&quot;')}, this)">
+          ${isFav ? '♥' : '♡'}
+        </button>
         ${sizesHtml ? `
         <div class="product-sizes">
           <span class="size-label">Size:</span>
@@ -133,6 +141,10 @@ function renderProducts(products, containerId = 'featuredProductsContainer') {
 
     container.appendChild(card);
   });
+
+  if (typeof syncAllWishlistButtons === 'function') {
+    syncAllWishlistButtons();
+  }
 }
 
 // ===== THÊM VÀO GIỎ HÀNG =====
@@ -143,18 +155,34 @@ function addProductToCart(productData) {
 }
 
 // ===== WISHLIST =====
-function toggleWishlist(btn, e) {
-  e.stopPropagation();
-  if (btn.textContent === '♡') {
-    btn.textContent = '♥';
-    btn.style.color = '#e11d48';
-    showToast('Đã thêm vào mục Yêu thích!');
-  } else {
-    btn.textContent = '♡';
-    btn.style.color = '';
-    showToast('Đã xóa khỏi mục Yêu thích', 'error');
+function toggleWishlist(productOrBtn, maybeBtnOrEvent) {
+  if (productOrBtn && productOrBtn.id) {
+    toggleWishlistProduct(productOrBtn, maybeBtnOrEvent);
+  } else if (productOrBtn instanceof HTMLElement || (productOrBtn && productOrBtn.tagName)) {
+    const btn = productOrBtn;
+    const e = maybeBtnOrEvent;
+    if (e && e.stopPropagation) e.stopPropagation();
+    const pid = btn.getAttribute('data-product-id');
+    if (pid && allProducts.length > 0) {
+      const prod = allProducts.find(p => Number(p.id) === Number(pid));
+      if (prod) {
+        toggleWishlistProduct(prod, btn);
+        return;
+      }
+    }
+    if (btn.textContent.trim() === '♡') {
+      btn.textContent = '♥';
+      btn.style.color = '#e11d48';
+      showToast('Đã thêm vào mục Yêu thích!');
+    } else {
+      btn.textContent = '♡';
+      btn.style.color = '';
+      showToast('Đã xóa khỏi mục Yêu thích', 'error');
+    }
   }
 }
+window.toggleWishlist = toggleWishlist;
+
 
 function selectCardSize(e, size) {
   e.stopPropagation();

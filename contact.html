@@ -199,8 +199,9 @@
       </div>
 
       <!-- Wishlist Button -->
-      <button class="btn-round-action" title="Mục yêu thích" onclick="showToast('Danh sách Yêu thích của bạn')">
-        ♡
+      <button class="btn-round-action btn-wishlist-trigger" id="btnOpenWishlist" title="Mục yêu thích">
+        <span style="font-size:1.15rem; line-height:1;">♡</span>
+        <span class="cart-badge wishlist-badge" id="wishlistBadge">0</span>
       </button>
 
       <!-- Cart Button -->
@@ -242,6 +243,25 @@
     <button class="btn-checkout" id="btnCheckout">Thanh toán ngay →</button>
   </div>
 </aside>
+
+<!-- ========== WISHLIST SIDEBAR ========== -->
+<div class="cart-overlay wishlist-overlay" id="wishlistOverlay"></div>
+<aside class="cart-sidebar wishlist-sidebar" id="wishlistSidebar">
+  <div class="cart-header">
+    <h3>Mục yêu thích (<span id="wishlistCountHeader">0</span>)</h3>
+    <button class="btn-close-cart" id="btnCloseWishlist" title="Đóng">✕</button>
+  </div>
+  <div class="cart-items" id="wishlistItemsContainer"></div>
+  <div class="cart-footer" id="wishlistFooter" style="display:none;">
+    <button class="btn-primary" id="btnAddAllWishlistToCart" style="width:100%; justify-content:center; padding:14px; margin-bottom:10px;">
+      + Thêm tất cả vào giỏ hàng
+    </button>
+    <button class="btn-clear-wishlist" id="btnClearWishlist" style="width:100%; padding:10px; background:transparent; border:1px solid var(--gray-200); border-radius:var(--radius-pill); font-weight:700; color:var(--gray-600); cursor:pointer;">
+      Xóa tất cả yêu thích
+    </button>
+  </div>
+</aside>
+
 
 <!-- ========== CONTACT PAGE HEADER ========== -->
 <div class="contact-page-header">

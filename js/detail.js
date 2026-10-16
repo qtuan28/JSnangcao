@@ -170,13 +170,19 @@ function renderDetailView(product) {
           <span style="font-size:0.9rem; color:#64748b;">Tối đa ${product.stock} đôi</span>
         </div>
 
-        <!-- Nút Đặt Mua -->
+        <!-- Nút Đặt Mua & Yêu Thích -->
         <div class="detail-actions">
           <button class="btn-add-detail" onclick="handleAddToCart()">
             + Thêm vào túi đồ
           </button>
           <button class="btn-buy-now" onclick="handleBuyNow()">
             Mua ngay
+          </button>
+          <button class="btn-wishlist-detail ${typeof wishlist !== 'undefined' && wishlist.has(product.id) ? 'active' : ''}" 
+                  id="btnDetailWishlist" 
+                  data-product-id="${product.id}"
+                  onclick="handleToggleDetailWishlist()">
+            ${typeof wishlist !== 'undefined' && wishlist.has(product.id) ? '♥ Đã thêm vào mục Yêu thích' : '♡ Thêm vào mục Yêu thích'}
           </button>
         </div>
 
@@ -247,6 +253,31 @@ function handleBuyNow() {
   }
 }
 
+// Toggle Yêu thích từ trang chi tiết
+function handleToggleDetailWishlist() {
+  if (!currentProduct) return;
+  const isAdded = wishlist.toggle(currentProduct);
+  const btn = document.getElementById('btnDetailWishlist');
+  if (btn) {
+    if (isAdded) {
+      btn.classList.add('active');
+      btn.innerHTML = '♥ Đã thêm vào mục Yêu thích';
+    } else {
+      btn.classList.remove('active');
+      btn.innerHTML = '♡ Thêm vào mục Yêu thích';
+    }
+  }
+  updateWishlistBadge();
+  syncWishlistButtons(currentProduct.id, isAdded);
+  renderWishlist();
+
+  if (isAdded) {
+    showToast(`Đã thêm "${currentProduct.name}" vào mục Yêu thích!`);
+  } else {
+    showToast(`Đã xóa "${currentProduct.name}" khỏi mục Yêu thích`, 'error');
+  }
+}
+
 // 8. RENDER SẢN PHẨM CÙNG DANH MỤC LIÊN QUAN
 function renderRelatedProducts(allProducts, product) {
   const container = document.getElementById('relatedProductsContainer');
@@ -267,12 +298,20 @@ function renderRelatedProducts(allProducts, product) {
   container.innerHTML = '';
 
   related.forEach(item => {
+    const isFav = typeof wishlist !== 'undefined' && wishlist.has(item.id);
     const card = document.createElement('div');
     card.className = 'product-card';
     card.innerHTML = `
       <div class="product-image-wrap" onclick="location.href='detail.html?id=${item.id}'">
         <img src="${item.image}" alt="${item.name}" loading="lazy" />
         <span class="product-badge">${item.category}</span>
+        <button class="product-wishlist ${isFav ? 'active' : ''}" 
+                data-product-id="${item.id}"
+                style="${isFav ? 'color:#e11d48;' : ''}"
+                title="${isFav ? 'Bỏ yêu thích' : 'Yêu thích'}" 
+                onclick="event.stopPropagation(); toggleWishlistProduct(${JSON.stringify(item).replace(/"/g, '&quot;')}, this)">
+          ${isFav ? '♥' : '♡'}
+        </button>
       </div>
       <div class="product-info">
         <div class="product-category">${item.category}</div>
@@ -287,6 +326,10 @@ function renderRelatedProducts(allProducts, product) {
     `;
     container.appendChild(card);
   });
+
+  if (typeof syncAllWishlistButtons === 'function') {
+    syncAllWishlistButtons();
+  }
 }
 
 function quickAddRelated(productData) {
@@ -296,12 +339,15 @@ function quickAddRelated(productData) {
 }
 
 // Gắn các hàm ra window để các nút onclick trong HTML có thể gọi
-window.selectDetailSize = selectDetailSize;
-window.changeMainImage  = changeMainImage;
-window.updateQty        = updateQty;
-window.handleAddToCart  = handleAddToCart;
-window.handleBuyNow     = handleBuyNow;
-window.quickAddRelated  = quickAddRelated;
+window.selectDetailSize           = selectDetailSize;
+window.changeMainImage            = changeMainImage;
+window.updateQty                  = updateQty;
+window.handleAddToCart            = handleAddToCart;
+window.handleBuyNow               = handleBuyNow;
+window.handleToggleDetailWishlist = handleToggleDetailWishlist;
+window.quickAddRelated            = quickAddRelated;
+window.toggleWishlist             = toggleWishlistProduct;
+
 
 // Tự động chạy khi tải xong trang
 document.addEventListener('DOMContentLoaded', () => {
