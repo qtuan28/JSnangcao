@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – SneakerZone</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="admin-layout">
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="logo" style="padding: 24px;">
+      <div class="logo-text">Sneaker<span>Zone</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="admin.html" class="active" id="navDashboard">Dashboard</a>
+      <a href="#" id="navProducts" onclick="showTab('products')">Sản phẩm</a>
+      <a href="#" id="navCategories" onclick="showTab('categories')">Danh mục</a>
+      <a href="index.html" style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px;">Về trang chủ</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+    <!-- DASHBOARD TAB -->
+    <div id="tabDashboard">
+      <div class="admin-page-header">
+        <h1>Dashboard</h1>
+        <span id="adminWelcome" style="color: var(--text-secondary);"></span>
+      </div>
+
+      <div class="stats-grid" id="statsGrid"></div>
+
+      <!-- Bảng sản phẩm tóm tắt -->
+      <div class="table-wrap" style="margin-top: 8px;">
+        <div class="table-toolbar">
+          <strong>Sản phẩm gần đây</strong>
+          <button class="btn-primary" onclick="showTab('products')" style="font-size:0.85rem; padding: 8px 16px;">
+            Xem tất cả →
+          </button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Ảnh</th>
+              <th>Tên sản phẩm</th>
+              <th>Thương hiệu</th>
+              <th>Giá</th>
+              <th>Tồn kho</th>
+            </tr>
+          </thead>
+          <tbody id="dashboardProductsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PRODUCTS TAB -->
+    <div id="tabProducts" style="display:none;">
+      <div class="admin-page-header">
+        <h1>Quản lý sản phẩm</h1>
+        <button class="btn-primary" id="btnAddProduct">+ Thêm sản phẩm</button>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input type="text" class="search-input" id="searchProducts" placeholder="Tìm sản phẩm..." />
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Ảnh</th>
+              <th>Tên sản phẩm</th>
+              <th>Thương hiệu</th>
+              <th>Giá</th>
+              <th>Tồn kho</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="productsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CATEGORIES TAB -->
+    <div id="tabCategories" style="display:none;">
+      <div class="admin-page-header">
+        <h1>Quản lý danh mục</h1>
+        <button class="btn-primary" id="btnAddCategory">+ Thêm danh mục</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Icon</th>
+              <th>Tên danh mục</th>
+              <th>Số sản phẩm</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="categoriesTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ======= MODAL SẢN PHẨM ======= -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="productModalTitle">Thêm sản phẩm</h3>
+      <button class="btn-close-modal" onclick="closeModal('productModal')">✕</button>
+    </div>
+    <form id="productForm">
+      <input type="hidden" id="productId" />
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tên sản phẩm *</label>
+          <input type="text" id="productName" placeholder="Nike Air Max..." required />
+        </div>
+        <div class="form-group">
+          <label>Thương hiệu *</label>
+          <select id="productCategory"></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Giá (₫) *</label>
+          <input type="number" id="productPrice" placeholder="2000000" required />
+        </div>
+        <div class="form-group">
+          <label>Tồn kho *</label>
+          <input type="number" id="productStock" placeholder="10" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Link ảnh</label>
+        <input type="text" id="productImage" placeholder="https://..." />
+      </div>
+      <div class="form-group">
+        <label>Mô tả</label>
+        <textarea id="productDescription" placeholder="Mô tả sản phẩm..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" onclick="closeModal('productModal')">Hủy</button>
+        <button type="submit" class="btn-save">Lưu</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ======= MODAL DANH MỤC ======= -->
+<div class="modal-overlay" id="categoryModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="categoryModalTitle">Thêm danh mục</h3>
+      <button class="btn-close-modal" onclick="closeModal('categoryModal')">✕</button>
+    </div>
+    <form id="categoryForm">
+      <input type="hidden" id="categoryId" />
+      <div class="form-group">
+        <label>Tên danh mục *</label>
+        <input type="text" id="categoryName" placeholder="Nike, Adidas..." required />
+      </div>
+      <div class="form-group">
+        <label>Icon (emoji)</label>
+        <input type="text" id="categoryIcon" placeholder="🟠" />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" onclick="closeModal('categoryModal')">Hủy</button>
+        <button type="submit" class="btn-save">Lưu</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>

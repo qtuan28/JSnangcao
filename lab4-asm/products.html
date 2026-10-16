@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sản phẩm – SneakerZone</title>
+  <meta name="description" content="Khám phá toàn bộ bộ sưu tập giày thể thao tại SneakerZone" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .products-page { padding: 40px 5%; background: var(--dark); min-height: 100vh; }
+    .products-page h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 28px; color: var(--text-primary); }
+    .filter-bar {
+      display: flex; gap: 12px; align-items: center;
+      flex-wrap: wrap; margin-bottom: 32px;
+    }
+    .filter-bar select {
+      padding: 10px 16px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .filter-bar select:focus { outline: none; border-color: var(--primary); }
+    .search-box {
+      flex: 1; min-width: 220px; max-width: 340px;
+      padding: 10px 16px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary); font-size: 0.9rem;
+      font-weight: 500;
+      transition: var(--transition);
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .search-box:focus { outline: none; border-color: var(--primary); }
+    .search-box::placeholder { color: var(--text-muted); }
+    .no-result { grid-column: 1/-1; text-align: center; padding: 60px; color: var(--text-secondary); font-size: 1.1rem; font-weight: 500; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-text">Sneaker<span>Zone</span></div>
+    </a>
+    <nav class="nav">
+      <a href="index.html">Trang chủ</a>
+      <a href="products.html" class="active">Sản phẩm</a>
+      <a href="index.html#categories">Danh mục</a>
+      <a href="index.html#footer">Liên hệ</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn-icon" id="btnOpenCart" title="Giỏ hàng">
+        Giỏ hàng <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+      <div id="headerUserArea">
+        <a href="login.html" class="btn-login">Đăng nhập</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- CART SIDEBAR -->
+<div class="cart-overlay" id="cartOverlay"></div>
+<aside class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h3>Giỏ hàng của bạn</h3>
+    <button class="btn-close-cart" id="btnCloseCart">✕</button>
+  </div>
+  <div class="cart-items" id="cartItemsContainer">
+    <div class="cart-empty"><p>Giỏ hàng trống</p></div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total">
+      <span>Tổng cộng:</span>
+      <span id="cartTotal">0₫</span>
+    </div>
+    <button class="btn-checkout" id="btnCheckout">Thanh toán ngay →</button>
+  </div>
+</aside>
+
+<!-- PRODUCTS PAGE -->
+<main class="products-page">
+  <h1>Tất cả sản phẩm</h1>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <input type="text" class="search-box" id="searchBox" placeholder="Tìm kiếm giày..." />
+    <select id="filterCategory">
+      <option value="">Tất cả thương hiệu</option>
+    </select>
+    <select id="sortBy">
+      <option value="">Sắp xếp</option>
+      <option value="price-asc">Giá tăng dần</option>
+      <option value="price-desc">Giá giảm dần</option>
+      <option value="name-asc">Tên A → Z</option>
+    </select>
+  </div>
+
+  <!-- Products Grid -->
+  <div class="products-grid" id="productsContainer"></div>
+</main>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<footer class="footer" id="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo">
+        <div class="logo-text">Sneaker<span>Zone</span></div>
+      </div>
+      <p>Cửa hàng giày thể thao chính hãng hàng đầu Việt Nam. Cam kết chất lượng, giá cả cạnh tranh.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Sản phẩm</h4>
+      <ul>
+        <li><a href="products.html">Nike</a></li>
+        <li><a href="products.html">Adidas</a></li>
+        <li><a href="products.html">Puma</a></li>
+        <li><a href="products.html">Converse</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Hỗ trợ</h4>
+      <ul>
+        <li><a href="#">Chính sách đổi trả</a></li>
+        <li><a href="#">Hướng dẫn chọn size</a></li>
+        <li><a href="#">Liên hệ</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Liên hệ</h4>
+      <ul>
+        <li><a href="#">info@sneakerzone.vn</a></li>
+        <li><a href="#">0909 123 456</a></li>
+        <li><a href="#">TP. Ho Chi Minh</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2024 SneakerZone. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="js/Cart.js"></script>
+<script src="js/products.js"></script>
+</body>
+</html>
