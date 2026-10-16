@@ -41,8 +41,12 @@
       </button>
 
       <!-- Cart Button -->
-      <button class="btn-round-action btn-cart-trigger" id="btnOpenCart" title="Giỏ hàng">
-        <span style="font-size:0.75rem; font-weight:700;">GIỎ</span>
+      <button class="btn-round-action btn-cart-trigger" id="btnOpenCart" title="Giỏ hàng" aria-label="Xem giỏ hàng">
+        <svg class="cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="8" cy="21" r="1" fill="currentColor"></circle>
+          <circle cx="19" cy="21" r="1" fill="currentColor"></circle>
+          <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+        </svg>
         <span class="cart-badge" id="cartBadge">0</span>
       </button>
 
