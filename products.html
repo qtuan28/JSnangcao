@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tất Cả Sản Phẩm Giày Thể Thao – SneakerZone</title>
+  <meta name="description" content="Khám phá toàn bộ bộ sưu tập giày thể thao nam & nữ tại SneakerZone. Nike, Adidas, Puma, Converse chính hãng." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ========== MAIN NIKE HEADER ========== -->
+<header class="header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <svg class="swoosh-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M21.7 4.2C15.8 8.1 10.6 13.8 6.5 19.5 5 17.5 3.5 15.6 2.3 14c-.6-.7-1.7-.2-1.7.7 0 .5.3 1 .7 1.4 3 3.6 5.8 7.3 6.6 7.8.6.4 1.3.1 1.7-.5 4.3-6.5 9.7-13.1 16-17.6.7-.5.2-1.6-.7-1.6h-3.2z"/>
+      </svg>
+      <span class="logo-text">Sneaker<span>Zone</span></span>
+    </a>
+
+    <nav class="nav">
+      <a href="index.html">Trang chủ</a>
+      <a href="products.html" class="active">Sản phẩm</a>
+      <a href="about.html">Giới thiệu</a>
+      <a href="contact.html">Liên hệ</a>
+    </nav>
+
+    <div class="header-actions">
+      <!-- Search Bar -->
+      <div class="header-search-box">
+        <input type="text" id="headerSearchInput" placeholder="Tìm kiếm sản phẩm..." autocomplete="off" />
+      </div>
+
+      <button class="btn-round-action" title="Mục yêu thích" onclick="showToast('Danh sách Yêu thích của bạn')">
+        ♡
+      </button>
+      <button class="btn-round-action btn-cart-trigger" id="btnOpenCart" title="Giỏ hàng">
+        <span style="font-size:0.75rem; font-weight:700;">GIỎ</span>
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+      <div id="headerUserArea">
+        <a href="login.html" class="btn-nike-login">Đăng nhập</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ========== ANNOUNCEMENT TICKER ========== -->
+<div class="announce-bar">
+  <div class="announce-content">
+    <span>Miễn phí vận chuyển toàn quốc cho đơn hàng từ 1.000.000₫ &nbsp;·&nbsp; Đổi trả dễ dàng trong 30 ngày</span>
+  </div>
+</div>
+
+<!-- ========== CART SIDEBAR ========== -->
+<div class="cart-overlay" id="cartOverlay"></div>
+<aside class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h3>Túi đồ của bạn</h3>
+    <button class="btn-close-cart" id="btnCloseCart">✕</button>
+  </div>
+  <div class="cart-items" id="cartItemsContainer">
+    <div class="cart-empty"><p>Túi đồ của bạn đang trống</p></div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total">
+      <span>Tổng thanh toán:</span>
+      <span id="cartTotal">0₫</span>
+    </div>
+    <button class="btn-checkout" id="btnCheckout">Thanh toán ngay →</button>
+  </div>
+</aside>
+
+<!-- ========== NIKE PRODUCT CATALOG MAIN ========== -->
+<div class="catalog-page-container">
+
+  <!-- Sticky Top Controls Bar -->
+  <div class="catalog-header-bar">
+    <div class="catalog-title-wrap">
+      <h1>Tất Cả Giày & Sneaker</h1>
+      <span class="catalog-count">(<span id="productCount">8</span>)</span>
+    </div>
+
+    <div class="catalog-controls">
+      <button class="btn-filter-toggle" id="btnToggleFilter">
+        Ẩn bộ lọc
+      </button>
+
+      <div class="sort-wrap">
+        <label for="sortBy" class="sort-label">Sắp xếp:</label>
+        <select id="sortBy" class="sort-select">
+          <option value="newest">Mới nhất</option>
+          <option value="price-asc">Giá: Thấp đến Cao</option>
+          <option value="price-desc">Giá: Cao đến Thấp</option>
+          <option value="name-asc">Tên: A → Z</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2-Column Shop Layout -->
+  <div class="nike-shop-layout">
+
+    <!-- Filter Sidebar -->
+    <aside class="filter-sidebar" id="filterSidebar">
+
+      <!-- Search in filter -->
+      <div class="filter-group">
+        <label class="filter-group-title">Tìm kiếm</label>
+        <div class="sidebar-search-box">
+          <input type="text" id="searchBox" placeholder="Nhập tên giày..." />
+        </div>
+      </div>
+
+      <!-- Categories / Brands -->
+      <div class="filter-group">
+        <label class="filter-group-title">Thương hiệu</label>
+        <div class="filter-pill-list" id="categoryFilters"></div>
+      </div>
+
+      <!-- Price Range -->
+      <div class="filter-group">
+        <label class="filter-group-title">Mức giá</label>
+        <div class="filter-pill-list" id="priceFilters">
+          <button class="filter-pill filter-price-option active" id="price-all" data-range="">Tất cả giá</button>
+          <button class="filter-pill filter-price-option" data-range="under-2m">Dưới 2.000.000₫</button>
+          <button class="filter-pill filter-price-option" data-range="2m-3m">2.000.000₫ – 3.000.000₫</button>
+          <button class="filter-pill filter-price-option" data-range="over-3m">Trên 3.000.000₫</button>
+        </div>
+      </div>
+
+      <!-- Size Chips Grid -->
+      <div class="filter-group">
+        <label class="filter-group-title">Kích cỡ giày (Size)</label>
+        <div class="size-filter-grid" id="sizeFilters">
+          <button class="filter-size-btn" data-size="36">36</button>
+          <button class="filter-size-btn" data-size="37">37</button>
+          <button class="filter-size-btn" data-size="38">38</button>
+          <button class="filter-size-btn" data-size="39">39</button>
+          <button class="filter-size-btn" data-size="40">40</button>
+          <button class="filter-size-btn" data-size="41">41</button>
+          <button class="filter-size-btn" data-size="42">42</button>
+          <button class="filter-size-btn" data-size="43">43</button>
+          <button class="filter-size-btn" data-size="44">44</button>
+          <button class="filter-size-btn" data-size="45">45</button>
+        </div>
+      </div>
+
+      <!-- Reset Filter Button -->
+      <div class="filter-actions">
+        <button class="btn-reset-filters" id="btnResetFilters">Đặt lại bộ lọc</button>
+      </div>
+    </aside>
+
+    <!-- Main Catalog Area -->
+    <main class="products-catalog-area">
+      <div class="nike-product-grid" id="productsContainer"></div>
+    </main>
+
+  </div>
+</div>
+
+<!-- ========== TOAST ========== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ========== FOOTER ========== -->
+<footer class="footer" id="footer">
+  <div class="footer-grid">
+    <div class="footer-col footer-col-primary">
+      <h4>TÀI NGUYÊN</h4>
+      <ul>
+        <li><a href="products.html">TÌM CỬA HÀNG</a></li>
+        <li><a href="login.html?tab=register">GIA NHẬP SNEAKERZONE</a></li>
+        <li><a href="#">THẺ QUÀ TẶNG</a></li>
+        <li><a href="#">GỬI PHẢN HỒI</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>TRỢ GIÚP</h4>
+      <ul>
+        <li><a href="#">Tình trạng đơn hàng</a></li>
+        <li><a href="#">Giao hàng & Vận chuyển</a></li>
+        <li><a href="#">Chính sách đổi trả</a></li>
+        <li><a href="#">Phương thức thanh toán</a></li>
+        <li><a href="#">Hướng dẫn chọn size</a></li>
+        <li><a href="#">Liên hệ với chúng tôi</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>VỀ SNEAKERZONE</h4>
+      <ul>
+        <li><a href="#">Tin tức & Báo chí</a></li>
+        <li><a href="#">Cơ hội nghề nghiệp</a></li>
+        <li><a href="#">Đầu tư & Hợp tác</a></li>
+        <li><a href="#">Phát triển bền vững</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>KẾT NỐI VỚI CHÚNG TÔI</h4>
+      <div class="social-links">
+        <a href="#" class="social-icon" title="Facebook">FB</a>
+        <a href="#" class="social-icon" title="Instagram">IG</a>
+        <a href="#" class="social-icon" title="YouTube">YT</a>
+        <a href="#" class="social-icon" title="TikTok">TT</a>
+      </div>
+      <p class="footer-hotline">Hotline: <strong>1900 6868</strong><br/>Email: <strong>support@sneakerzone.vn</strong></p>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="footer-bottom-inner">
+      <div class="footer-country">
+        <span>Việt Nam</span>
+        <span class="copy-text">© 2024 SneakerZone, Inc. Bảo lưu mọi quyền.</span>
+      </div>
+      <div class="footer-legal">
+        <a href="#">Điều khoản sử dụng</a>
+        <a href="#">Chính sách bảo mật</a>
+        <a href="#">Cài đặt Cookie</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ========== SCRIPTS ========== -->
+<script src="js/data.js"></script>
+<script src="js/Cart.js"></script>
+<script src="js/products.js"></script>
+</body>
+</html>

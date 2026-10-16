@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Liên Hệ – SneakerZone | Hỗ Trợ Khách Hàng 24/7</title>
+  <meta name="description" content="Liên hệ với SneakerZone để được tư vấn chọn size giày, hỗ trợ đặt hàng, đổi trả và giải đáp mọi thắc mắc nhanh chóng." />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .contact-page-header {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-100);
+      padding: 60px 32px 40px;
+      text-align: center;
+    }
+    .contact-page-header h1 {
+      font-size: clamp(2.2rem, 4vw, 3.5rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .contact-page-header p {
+      color: var(--gray-600);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .contact-container {
+      max-width: 1200px;
+      margin: 60px auto 100px;
+      padding: 0 32px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 50px;
+    }
+    @media (max-width: 860px) {
+      .contact-container {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+    }
+
+    /* FORM CARD */
+    .contact-card {
+      background: var(--white);
+      border: 1px solid var(--gray-100);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    }
+    .contact-card h2 {
+      font-size: 1.6rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .contact-form-group {
+      margin-bottom: 20px;
+    }
+    .contact-form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .contact-form-group input,
+    .contact-form-group select,
+    .contact-form-group textarea {
+      width: 100%;
+      padding: 14px 18px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .contact-form-group input:focus,
+    .contact-form-group select:focus,
+    .contact-form-group textarea:focus {
+      border-color: var(--black);
+    }
+    .contact-form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .btn-contact-submit {
+      width: 100%;
+      background: var(--black);
+      color: var(--white);
+      border: none;
+      border-radius: 999px;
+      padding: 16px;
+      font-size: 1rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-contact-submit:hover {
+      background: #2b2b2b;
+    }
+    .btn-contact-submit:active {
+      transform: scale(0.99);
+    }
+
+    /* INFO & STORES */
+    .contact-info-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .info-card {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-100);
+      border-radius: 16px;
+      padding: 28px;
+    }
+    .info-card h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .info-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .info-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.95rem;
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    .info-list .icon {
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    /* FAQ CARD */
+    .faq-item {
+      border-bottom: 1px solid var(--gray-200);
+      padding: 14px 0;
+    }
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+    .faq-q {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+    .faq-a {
+      font-size: 0.88rem;
+      color: var(--gray-600);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ========== MAIN NIKE HEADER ========== -->
+<header class="header">
+  <div class="header-inner">
+    <!-- SneakerZone Logo -->
+    <a href="index.html" class="logo">
+      <svg class="swoosh-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M21.7 4.2C15.8 8.1 10.6 13.8 6.5 19.5 5 17.5 3.5 15.6 2.3 14c-.6-.7-1.7-.2-1.7.7 0 .5.3 1 .7 1.4 3 3.6 5.8 7.3 6.6 7.8.6.4 1.3.1 1.7-.5 4.3-6.5 9.7-13.1 16-17.6.7-.5.2-1.6-.7-1.6h-3.2z"/>
+      </svg>
+      <span class="logo-text">Sneaker<span>Zone</span></span>
+    </a>
+
+    <!-- Center Navigation (Trang chủ, Sản phẩm, Giới thiệu, Liên hệ) -->
+    <nav class="nav" id="mainNav">
+      <a href="index.html">Trang chủ</a>
+      <a href="products.html">Sản phẩm</a>
+      <a href="about.html">Giới thiệu</a>
+      <a href="contact.html" class="active">Liên hệ</a>
+    </nav>
+
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <!-- Search Bar -->
+      <div class="header-search-box">
+        <input type="text" id="headerSearchInput" placeholder="Tìm kiếm sản phẩm..." autocomplete="off" />
+      </div>
+
+      <!-- Wishlist Button -->
+      <button class="btn-round-action" title="Mục yêu thích" onclick="showToast('Danh sách Yêu thích của bạn')">
+        ♡
+      </button>
+
+      <!-- Cart Button -->
+      <button class="btn-round-action btn-cart-trigger" id="btnOpenCart" title="Giỏ hàng">
+        <span style="font-size:0.75rem; font-weight:700;">GIỎ</span>
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+
+      <!-- User Area -->
+      <div id="headerUserArea">
+        <a href="login.html" class="btn-nike-login">Đăng nhập</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ========== ANNOUNCEMENT TICKER ========== -->
+<div class="announce-bar">
+  <div class="announce-content">
+    <span>Hotline hỗ trợ khách hàng: <strong>1900 6868</strong> (08:00 - 22:00 tất cả các ngày trong tuần)</span>
+  </div>
+</div>
+
+<!-- ========== CART SIDEBAR ========== -->
+<div class="cart-overlay" id="cartOverlay"></div>
+<aside class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h3>Túi đồ của bạn</h3>
+    <button class="btn-close-cart" id="btnCloseCart">✕</button>
+  </div>
+  <div class="cart-items" id="cartItemsContainer">
+    <div class="cart-empty"><p>Túi đồ của bạn đang trống</p></div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total">
+      <span>Tổng thanh toán:</span>
+      <span id="cartTotal">0₫</span>
+    </div>
+    <button class="btn-checkout" id="btnCheckout">Thanh toán ngay →</button>
+  </div>
+</aside>
+
+<!-- ========== CONTACT PAGE HEADER ========== -->
+<div class="contact-page-header">
+  <h1>LIÊN HỆ VỚI CHÚNG TÔI</h1>
+  <p>Bạn cần tư vấn size, theo dõi đơn hàng hoặc góp ý dịch vụ? Hãy để lại tin nhắn, đội ngũ SneakerZone sẽ hỗ trợ bạn ngay lập tức.</p>
+</div>
+
+<!-- ========== CONTACT BODY ========== -->
+<div class="contact-container">
+  <!-- LEFT: CONTACT FORM -->
+  <div class="contact-card">
+    <h2>GỬI TIN NHẮN CHO SNEAKERZONE</h2>
+    <form id="contactForm" onsubmit="handleContactSubmit(event)">
+      <div class="contact-form-group">
+        <label for="contactName">Họ và tên *</label>
+        <input type="text" id="contactName" placeholder="Nguyễn Văn A" required />
+      </div>
+
+      <div class="contact-form-group">
+        <label for="contactEmail">Địa chỉ Email *</label>
+        <input type="email" id="contactEmail" placeholder="your@email.com" required />
+      </div>
+
+      <div class="contact-form-group">
+        <label for="contactPhone">Số điện thoại</label>
+        <input type="tel" id="contactPhone" placeholder="0987 654 321" />
+      </div>
+
+      <div class="contact-form-group">
+        <label for="contactSubject">Chủ đề hỗ trợ</label>
+        <select id="contactSubject">
+          <option value="size">Tư vấn chọn size giày chuẩn</option>
+          <option value="order">Kiểm tra tình trạng đơn hàng</option>
+          <option value="return">Đổi trả & Bảo hành sản phẩm</option>
+          <option value="partner">Hợp tác kinh doanh & Đại lý</option>
+          <option value="feedback">Góp ý & Khiếu nại dịch vụ</option>
+        </select>
+      </div>
+
+      <div class="contact-form-group">
+        <label for="contactMessage">Nội dung tin nhắn *</label>
+        <textarea id="contactMessage" placeholder="Vui lòng mô tả chi tiết thắc mắc của bạn..." required></textarea>
+      </div>
+
+      <button type="submit" class="btn-contact-submit" id="btnSubmitContact">Gửi Tin Nhắn Ngay →</button>
+    </form>
+  </div>
+
+  <!-- RIGHT: STORE INFO & FAQ -->
+  <div class="contact-info-wrap">
+    <!-- Store Info Card -->
+    <div class="info-card">
+      <h3>CỬA HÀNG TRỰC TIẾP</h3>
+      <ul class="info-list">
+        <li>
+          <div>
+            <strong>Showroom Hà Nội:</strong><br />
+            Tòa nhà FPT Polytechnic, Phố Trịnh Văn Bô, Nam Từ Liêm, Hà Nội
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Tổng đài hỗ trợ:</strong><br />
+            1900 6868 &nbsp;·&nbsp; 0988 123 456
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Email chăm sóc khách hàng:</strong><br />
+            support@sneakerzone.vn
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Thời gian mở cửa:</strong><br />
+            Thứ Hai – Chủ Nhật: 08:30 – 21:30
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Quick FAQ Card -->
+    <div class="info-card">
+      <h3>CÂU HỎI THƯỜNG GẶP</h3>
+      <div class="faq-item">
+        <div class="faq-q">Làm sao để biết size giày nào vừa với chân tôi?</div>
+        <div class="faq-a">Bạn hãy đo chiều dài bàn chân từ gót đến ngón dài nhất, đối chiếu với bảng size EU hoặc liên hệ trực tiếp hotline để được tư vấn chính xác.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Thời gian giao hàng mất bao lâu?</div>
+        <div class="faq-a">Nội thành Hà Nội & TP.HCM giao hỏa tốc trong 2-4 giờ. Các tỉnh thành khác giao nhanh từ 1-3 ngày làm việc.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Chính sách đổi trả sản phẩm ra sao?</div>
+        <div class="faq-a">SneakerZone hỗ trợ đổi size và đổi mẫu miễn phí trong 30 ngày kể từ khi nhận hàng nếu sản phẩm còn nguyên hộp và tem mác.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== FOOTER ========== -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>TÌM CỬA HÀNG</h4>
+        <ul>
+          <li><a href="products.html">TÌM CỬA HÀNG</a></li>
+          <li><a href="about.html">TRỞ THÀNH THÀNH VIÊN</a></li>
+          <li><a href="contact.html">LIÊN HỆ PHẢN HỒI</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>TRỢ GIÚP</h4>
+        <ul>
+          <li><a href="#">Tình trạng đơn hàng</a></li>
+          <li><a href="#">Giao hàng & Vận chuyển</a></li>
+          <li><a href="#">Chính sách đổi trả</a></li>
+          <li><a href="contact.html">Liên hệ chúng tôi</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>VỀ SNEAKERZONE</h4>
+        <ul>
+          <li><a href="about.html">Tin tức</a></li>
+          <li><a href="about.html">Nghề nghiệp</a></li>
+          <li><a href="about.html">Nhà đầu tư</a></li>
+          <li><a href="about.html">Bền vững</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>KẾT NỐI VỚI CHÚNG TÔI</h4>
+        <div class="footer-socials">
+          <a href="#" class="social-btn" title="Facebook">f</a>
+          <a href="#" class="social-btn" title="Instagram">ig</a>
+          <a href="#" class="social-btn" title="YouTube">yt</a>
+          <a href="#" class="social-btn" title="Twitter">tw</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-country">Việt Nam · © 2026 SneakerZone, Inc. All Rights Reserved.</div>
+      <div class="footer-legal">
+        <a href="#">Hướng dẫn mua hàng</a>
+        <a href="#">Điều khoản sử dụng</a>
+        <a href="#">Chính sách bảo mật</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Shared JavaScripts -->
+<script src="js/data.js"></script>
+<script src="js/Cart.js"></script>
+<script>
+  function handleContactSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById('contactName').value.trim();
+    showToast(`Cảm ơn ${name}! Tin nhắn của bạn đã được gửi thành công. Chúng tôi sẽ phản hồi sớm.`);
+    document.getElementById('contactForm').reset();
+  }
+
+  // Header Search
+  const searchInput = document.getElementById('headerSearchInput');
+  if (searchInput) {
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && searchInput.value.trim()) {
+        window.location.href = `products.html?search=${encodeURIComponent(searchInput.value.trim())}`;
+      }
+    });
+  }
+</script>
+
+</body>
+</html>

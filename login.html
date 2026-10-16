@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng nhập & Đăng ký – SneakerZone</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="login-page">
+  <div class="login-card">
+    <a href="index.html" class="login-back-home">← Về trang chủ</a>
+
+    <!-- Logo -->
+    <div class="login-logo">
+      <h2>SneakerZone</h2>
+      <p id="authSubtitle">Đăng nhập để tiếp tục mua sắm</p>
+    </div>
+
+    <!-- Switch Tabs -->
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab-btn active" id="tabLoginBtn" onclick="switchAuthTab('login')">Đăng nhập</button>
+      <button type="button" class="auth-tab-btn" id="tabRegisterBtn" onclick="switchAuthTab('register')">Đăng ký</button>
+    </div>
+
+    <!-- Login Form -->
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="text" id="email" placeholder="your@email.com" autocomplete="email" />
+        <div class="error-msg" id="emailError">Email không hợp lệ!</div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mật khẩu</label>
+        <input type="password" id="password" placeholder="Nhập mật khẩu..." autocomplete="current-password" />
+        <div class="error-msg" id="passwordError">Mật khẩu ít nhất 6 ký tự!</div>
+      </div>
+
+      <div class="error-msg" id="loginError" style="margin-bottom:12px;"></div>
+
+      <button type="submit" class="btn-submit">Đăng nhập</button>
+
+      <div class="auth-switch-prompt">
+        Chưa có tài khoản? <a href="#" onclick="switchAuthTab('register'); return false;">Đăng ký ngay</a>
+      </div>
+    </form>
+
+    <!-- Register Form -->
+    <form id="registerForm" style="display: none;">
+      <div class="form-group">
+        <label for="regName">Họ và tên</label>
+        <input type="text" id="regName" placeholder="Nguyễn Văn A" autocomplete="name" />
+        <div class="error-msg" id="regNameError">Họ tên phải có ít nhất 2 ký tự!</div>
+      </div>
+
+      <div class="form-group">
+        <label for="regEmail">Email</label>
+        <input type="text" id="regEmail" placeholder="your@email.com" autocomplete="email" />
+        <div class="error-msg" id="regEmailError">Email không hợp lệ!</div>
+      </div>
+
+      <div class="form-group">
+        <label for="regPassword">Mật khẩu</label>
+        <input type="password" id="regPassword" placeholder="Tối thiểu 6 ký tự..." autocomplete="new-password" />
+        <div class="error-msg" id="regPasswordError">Mật khẩu phải có ít nhất 6 ký tự!</div>
+      </div>
+
+      <div class="form-group">
+        <label for="regConfirmPassword">Xác nhận mật khẩu</label>
+        <input type="password" id="regConfirmPassword" placeholder="Nhập lại mật khẩu..." autocomplete="new-password" />
+        <div class="error-msg" id="regConfirmPasswordError">Mật khẩu xác nhận không khớp!</div>
+      </div>
+
+      <div class="error-msg" id="regError" style="margin-bottom:12px;"></div>
+
+      <button type="submit" class="btn-submit">Đăng ký tài khoản</button>
+
+      <div class="auth-switch-prompt">
+        Đã có tài khoản? <a href="#" onclick="switchAuthTab('login'); return false;">Đăng nhập ngay</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/login.js"></script>
+</body>
+</html>
