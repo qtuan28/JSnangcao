@@ -37,6 +37,7 @@ class User {
 let products   = [];  // danh sách sản phẩm
 let categories = [];  // danh sách danh mục
 let users      = [];  // danh sách tất cả tài khoản người dùng / khách hàng trong website
+let orders     = [];  // danh sách đơn đặt hàng từ khách hàng
 
 async function loadData() {
   let initialProducts = (typeof LOCAL_DB !== 'undefined' ? LOCAL_DB.products : []);
@@ -111,6 +112,84 @@ async function loadData() {
     users = initialUsers.map(u => new User(u));
   }
 
+  // Tải danh sách đơn đặt hàng từ khách hàng trong localStorage ('orders')
+  const savedOrders = localStorage.getItem('orders');
+  if (savedOrders) {
+    try {
+      orders = JSON.parse(savedOrders);
+    } catch (e) {
+      orders = [];
+    }
+  }
+
+  // Nếu chưa có đơn hàng nào, tạo sẵn 3 đơn mẫu đại diện cho 3 trạng thái
+  if (!orders || orders.length === 0) {
+    orders = [
+      {
+        id: 'SZ-849201',
+        createdAt: '17/10/2026, 08:30',
+        customer: {
+          name: 'Nguyễn Văn A',
+          phone: '0912 345 678',
+          email: 'user@shoes.com',
+          city: 'Hà Nội',
+          address: 'Số 12 Cầu Giấy, P. Dịch Vọng',
+          note: 'Giao hàng vào giờ hành chính giúp em'
+        },
+        items: [
+          { name: 'Nike Air Max 270', quantity: 1, selectedSize: 42, price: 2800000, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&q=80' }
+        ],
+        sub: 2800000,
+        ship: 0,
+        grand: 2800000,
+        payment: 'Thanh toán khi nhận hàng (COD)',
+        status: 'Chờ xử lý'
+      },
+      {
+        id: 'SZ-512093',
+        createdAt: '16/10/2026, 14:15',
+        customer: {
+          name: 'Trần Thị Bích',
+          phone: '0987 654 321',
+          email: 'bichtran@gmail.com',
+          city: 'TP. Hồ Chí Minh',
+          address: '72 Lê Lợi, Phường Bến Nghé, Quận 1',
+          note: 'Gọi trước khi giao 15 phút'
+        },
+        items: [
+          { name: 'Adidas Ultraboost Light', quantity: 1, selectedSize: 39, price: 3200000, image: 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=100&q=80' },
+          { name: 'Vớ thể thao SneakerZone', quantity: 2, selectedSize: 40, price: 50000, image: 'https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=100&q=80' }
+        ],
+        sub: 3300000,
+        ship: 0,
+        grand: 3300000,
+        payment: 'Chuyển khoản ngân hàng',
+        status: 'Đang vận chuyển'
+      },
+      {
+        id: 'SZ-309112',
+        createdAt: '15/10/2026, 10:00',
+        customer: {
+          name: 'Lê Hoàng Long',
+          phone: '0933 888 999',
+          email: 'longle@outlook.com',
+          city: 'Đà Nẵng',
+          address: '45 Nguyễn Văn Linh, Hải Châu',
+          note: ''
+        },
+        items: [
+          { name: 'Puma Velocity Nitro 2', quantity: 1, selectedSize: 41, price: 2500000, image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=100&q=80' }
+        ],
+        sub: 2500000,
+        ship: 0,
+        grand: 2500000,
+        payment: 'Ví điện tử MoMo',
+        status: 'Đã giao'
+      }
+    ];
+    localStorage.setItem('orders', JSON.stringify(orders));
+  }
+
   saveData();  // lưu vào localStorage
 }
 
@@ -172,6 +251,8 @@ function showTab(tabName) {
   document.getElementById('tabProducts').style.display   = 'none';
   document.getElementById('tabCategories').style.display = 'none';
   document.getElementById('tabCustomers').style.display  = 'none';
+  const tabOrders = document.getElementById('tabOrders');
+  if (tabOrders) tabOrders.style.display = 'none';
 
   // Cập nhật class active cho menu bên trái
   document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
@@ -182,6 +263,11 @@ function showTab(tabName) {
 
   const navEl = document.getElementById('nav' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
   if (navEl) navEl.classList.add('active');
+
+  // Nếu chuyển sang tab Đơn hàng thì render lại danh sách đơn mới nhất
+  if (tabName === 'orders') {
+    renderOrdersTable();
+  }
 }
 
 // ============================================================
@@ -210,6 +296,13 @@ function renderDashboard() {
       <div class="stat-info">
         <div class="stat-value">${users.length}</div>
         <div class="stat-label">Tài khoản KH</div>
+      </div>
+    </div>
+    <div class="stat-card" style="cursor:pointer;" onclick="showTab('orders')">
+      <div class="stat-icon">ĐH</div>
+      <div class="stat-info">
+        <div class="stat-value">${orders.length}</div>
+        <div class="stat-label">Tổng đơn hàng</div>
       </div>
     </div>
     <div class="stat-card">
@@ -644,6 +737,216 @@ document.getElementById('searchCustomers').addEventListener('input', function ()
 });
 
 // ============================================================
+// QUẢN LÝ ĐƠN HÀNG (Dành cho Admin)
+// ============================================================
+function renderOrdersTable(list = orders) {
+  const tbody = document.getElementById('ordersTable');
+  const countLabel = document.getElementById('orderCountLabel');
+  if (countLabel) countLabel.textContent = `Tổng: ${list.length} đơn hàng`;
+  if (!tbody) return;
+
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 28px; color: var(--gray-600);">Chưa có đơn hàng nào từ khách hàng</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map(o => {
+    // Tóm tắt các món hàng khách mua
+    const itemsSummary = (o.items || []).map(it => `• ${it.name} (x${it.quantity || 1}) - Size ${it.selectedSize || 41}`).join('<br>');
+
+    // Badge màu hiển thị theo trạng thái
+    let statusBadge = '<span class="badge badge-warning" style="white-space: nowrap; display: inline-block;">Chờ xử lý</span>';
+    if (o.status === 'Đang vận chuyển') {
+      statusBadge = '<span class="badge badge-info" style="white-space: nowrap; display: inline-block;">Đang vận chuyển</span>';
+    } else if (o.status === 'Đã giao') {
+      statusBadge = '<span class="badge badge-success" style="white-space: nowrap; display: inline-block;">Đã giao</span>';
+    }
+
+    return `
+      <tr>
+        <td style="white-space: nowrap;"><strong style="color: var(--black); font-size: 0.95rem;">${o.id}</strong></td>
+        <td>
+          <strong>${o.customer?.name || 'Khách mua hàng'}</strong><br>
+          <small style="color: var(--gray-600); white-space: nowrap;">${o.customer?.phone || ''}</small>
+        </td>
+        <td style="font-size: 0.83rem; line-height: 1.4; min-width: 180px;">${itemsSummary || '1 sản phẩm'}</td>
+        <td style="white-space: nowrap;"><strong style="color: #e11d48; font-size: 0.95rem;">${formatPrice(o.grand || 0)}</strong></td>
+        <td style="white-space: nowrap; font-size: 0.82rem; color: var(--gray-600);">${o.createdAt || ''}</td>
+        <td style="white-space: nowrap; text-align: center;">${statusBadge}</td>
+        <td style="white-space: nowrap; text-align: right;">
+          <!-- 1. NÚT XEM CHI TIẾT -->
+          <button class="btn-edit" onclick="viewOrderDetail('${o.id}')" title="Xem đầy đủ chi tiết đơn hàng">
+            👁 Chi tiết
+          </button>
+          
+          <!-- 2. NÚT CHỌN TRẠNG THÁI (Chờ xử lý, Đang vận chuyển, Đã giao) -->
+          <select onchange="updateOrderStatus('${o.id}', this.value)" style="padding: 6px 10px; border-radius: 999px; border: 1.5px solid var(--gray-300); font-size: 0.8rem; font-weight: 700; cursor: pointer; background: #fff; margin-left: 6px;">
+            <option value="Chờ xử lý" ${o.status === 'Chờ xử lý' ? 'selected' : ''}>Chờ xử lý</option>
+            <option value="Đang vận chuyển" ${o.status === 'Đang vận chuyển' ? 'selected' : ''}>Đang vận chuyển</option>
+            <option value="Đã giao" ${o.status === 'Đã giao' ? 'selected' : ''}>Đã giao</option>
+          </select>
+
+          <!-- 3. NÚT XÓA ĐƠN HÀNG -->
+          <button class="btn-delete" onclick="deleteOrder('${o.id}')" style="margin-left: 6px;" title="Xóa đơn hàng">Xóa</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// XEM CHI TIẾT ĐƠN HÀNG (Modal Chi Tiết Đơn Hàng)
+// ============================================================
+function viewOrderDetail(orderId) {
+  const order = orders.find(o => o.id === orderId);
+  if (!order) {
+    showToast('Không tìm thấy thông tin đơn hàng!', 'error');
+    return;
+  }
+
+  const titleEl = document.getElementById('orderModalTitle');
+  const bodyEl = document.getElementById('orderModalBody');
+  if (titleEl) titleEl.textContent = `Chi tiết đơn hàng #${order.id}`;
+
+  // Màu sắc badge trạng thái
+  let statusBadge = '<span class="badge badge-warning" style="white-space: nowrap; display: inline-block;">Chờ xử lý</span>';
+  if (order.status === 'Đang vận chuyển') {
+    statusBadge = '<span class="badge badge-info" style="white-space: nowrap; display: inline-block;">Đang vận chuyển</span>';
+  } else if (order.status === 'Đã giao') {
+    statusBadge = '<span class="badge badge-success" style="white-space: nowrap; display: inline-block;">Đã giao</span>';
+  }
+
+  // Danh sách dòng sản phẩm
+  const itemsHtml = (order.items || []).map(it => `
+    <tr style="border-bottom: 1px solid var(--gray-100);">
+      <td style="padding: 10px; width: 50px;">
+        <img src="${it.image || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&q=80'}" 
+             alt="${it.name}" 
+             style="width: 44px; height: 44px; object-fit: cover; border-radius: 8px; border: 1px solid var(--gray-200);"
+             onerror="this.src='https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&q=80'" />
+      </td>
+      <td style="padding: 10px;">
+        <strong>${it.name}</strong>
+      </td>
+      <td style="padding: 10px; text-align: center;">Size ${it.selectedSize || 41}</td>
+      <td style="padding: 10px; text-align: center;"><strong>x${it.quantity || 1}</strong></td>
+      <td style="padding: 10px; text-align: right;">${formatPrice(it.price || 0)}</td>
+      <td style="padding: 10px; text-align: right;"><strong style="color: #e11d48;">${formatPrice((it.price || 0) * (it.quantity || 1))}</strong></td>
+    </tr>
+  `).join('');
+
+  const fullAddress = `${order.customer?.address || 'Chưa có địa chỉ cụ thể'}${order.customer?.city ? ', ' + order.customer.city : ''}`;
+
+  bodyEl.innerHTML = `
+    <!-- 1. Thanh tóm tắt Mã đơn, Ngày & Trạng thái -->
+    <div style="display: flex; justify-content: space-between; align-items: center; background: var(--gray-50); padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; border: 1px solid var(--gray-200);">
+      <div>
+        <span style="color: var(--gray-600); font-size: 0.82rem;">MÃ ĐƠN HÀNG:</span>
+        <strong style="font-size: 1.05rem; margin-left: 6px; color: var(--black);">${order.id}</strong>
+      </div>
+      <div>
+        <span style="color: var(--gray-600); font-size: 0.82rem; margin-right: 6px;">TRẠNG THÁI:</span>
+        ${statusBadge}
+      </div>
+    </div>
+
+    <!-- 2. Thông tin khách hàng & Giao hàng -->
+    <div style="border: 1px solid var(--gray-200); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+      <div style="font-weight: 800; font-size: 0.92rem; text-transform: uppercase; margin-bottom: 12px; color: var(--black);">
+        📦 THÔNG TIN KHÁCH HÀNG & GIAO HÀNG
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.88rem;">
+        <div><strong>Họ và tên:</strong> ${order.customer?.name || 'Khách vãng lai'}</div>
+        <div><strong>Số điện thoại:</strong> ${order.customer?.phone || 'Chưa cập nhật'}</div>
+        <div><strong>Email liên hệ:</strong> ${order.customer?.email || 'Chưa cập nhật'}</div>
+        <div><strong>Hình thức thanh toán:</strong> ${order.payment || 'Thanh toán COD'}</div>
+        <div style="grid-column: 1 / -1;">
+          <strong>Địa chỉ nhận hàng:</strong> ${fullAddress}
+        </div>
+        ${order.customer?.note ? `
+          <div style="grid-column: 1 / -1; background: #fefce8; padding: 8px 12px; border-radius: 8px; border-left: 3px solid #eab308; color: #854d0e;">
+            <strong>Ghi chú:</strong> ${order.customer.note}
+          </div>
+        ` : ''}
+        <div style="grid-column: 1 / -1; color: var(--gray-600); font-size: 0.8rem; margin-top: 4px;">
+          🕒 <strong>Thời gian đặt:</strong> ${order.createdAt || 'Mới đặt gần đây'}
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Danh sách sản phẩm mua -->
+    <div style="border: 1px solid var(--gray-200); border-radius: 12px; overflow: hidden; margin-bottom: 16px;">
+      <div style="padding: 12px 16px; background: var(--gray-50); font-weight: 800; font-size: 0.92rem; text-transform: uppercase; color: var(--black);">
+        👟 SẢN PHẨM ĐẶT MUA (${(order.items || []).length} sản phẩm)
+      </div>
+      <div style="max-height: 200px; overflow-y: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+          <thead style="background: var(--gray-100); border-bottom: 1px solid var(--gray-200);">
+            <tr>
+              <th style="padding: 8px 10px;">Ảnh</th>
+              <th style="padding: 8px 10px;">Tên sản phẩm</th>
+              <th style="padding: 8px 10px; text-align: center;">Size</th>
+              <th style="padding: 8px 10px; text-align: center;">SL</th>
+              <th style="padding: 8px 10px; text-align: right;">Đơn giá</th>
+              <th style="padding: 8px 10px; text-align: right;">Thành tiền</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml || '<tr><td colspan="6" style="text-align:center; padding:15px;">Không có thông tin sản phẩm</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 4. Tổng kết chi phí thanh toán -->
+    <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end; padding-top: 6px;">
+      <div style="color: var(--gray-600); font-size: 0.88rem;">Tạm tính tiền hàng: <strong>${formatPrice(order.sub || order.grand)}</strong></div>
+      <div style="color: var(--gray-600); font-size: 0.88rem;">Phí giao hàng: <strong>${order.ship === 0 ? 'MIỄN PHÍ' : formatPrice(order.ship || 0)}</strong></div>
+      <div style="font-size: 1.15rem; color: #e11d48; margin-top: 4px;">
+        Tổng thanh toán: <strong style="font-size: 1.25rem;">${formatPrice(order.grand || 0)}</strong>
+      </div>
+    </div>
+  `;
+
+  openModal('orderDetailModal');
+}
+
+// Cập nhật trạng thái đơn hàng (Chờ xử lý, Đang vận chuyển, Đã giao)
+function updateOrderStatus(orderId, newStatus) {
+  const order = orders.find(o => o.id === orderId);
+  if (order) {
+    order.status = newStatus;
+    localStorage.setItem('orders', JSON.stringify(orders));
+    renderOrdersTable();
+    showToast(`Đã chuyển đơn ${orderId} sang "${newStatus}"!`);
+  }
+}
+
+// Xóa đơn hàng
+function deleteOrder(orderId) {
+  if (!confirm(`Bạn chắc chắn muốn xóa đơn hàng "${orderId}" không?`)) return;
+  orders = orders.filter(o => o.id !== orderId);
+  localStorage.setItem('orders', JSON.stringify(orders));
+  renderOrdersTable();
+  renderDashboard();
+  showToast(`Đã xóa đơn hàng ${orderId}!`);
+}
+
+// Tìm kiếm đơn hàng theo mã đơn hoặc tên/SĐT khách
+const searchOrdersInput = document.getElementById('searchOrders');
+if (searchOrdersInput) {
+  searchOrdersInput.addEventListener('input', function () {
+    const keyword = this.value.toLowerCase().trim();
+    const filtered = orders.filter(o =>
+      o.id.toLowerCase().includes(keyword) ||
+      (o.customer?.name && o.customer.name.toLowerCase().includes(keyword)) ||
+      (o.customer?.phone && o.customer.phone.includes(keyword))
+    );
+    renderOrdersTable(filtered);
+  });
+}
+
+// ============================================================
 // ĐĂNG XUẤT ADMIN
 // ============================================================
 function logout() {
@@ -671,6 +974,10 @@ window.renderDashboard       = renderDashboard;
 window.renderProductsTable   = renderProductsTable;
 window.renderCategoriesTable = renderCategoriesTable;
 window.renderCustomersTable  = renderCustomersTable;
+window.renderOrdersTable     = renderOrdersTable;
+window.viewOrderDetail       = viewOrderDetail;
+window.updateOrderStatus     = updateOrderStatus;
+window.deleteOrder           = deleteOrder;
 window.openAddProductModal   = openAddProductModal;
 window.editProduct           = editProduct;
 window.deleteProduct         = deleteProduct;
@@ -709,6 +1016,7 @@ async function init() {
   renderProductsTable();
   renderCategoriesTable();
   renderCustomersTable();
+  renderOrdersTable();
 }
 
 init();

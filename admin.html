@@ -18,6 +18,7 @@
       <a href="#" class="active" id="navDashboard" onclick="showTab('dashboard'); return false;">Dashboard</a>
       <a href="#" id="navProducts" onclick="showTab('products'); return false;">Sản phẩm</a>
       <a href="#" id="navCategories" onclick="showTab('categories'); return false;">Danh mục</a>
+      <a href="#" id="navOrders" onclick="showTab('orders'); return false;">Quản lý đơn hàng</a>
       <a href="#" id="navCustomers" onclick="showTab('customers'); return false;">Tài khoản khách hàng</a>
       <a href="index.html" style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px;">Về trang chủ</a>
       <a href="#" onclick="logout(); return false;" style="color: #ef4444; font-weight: 700;">Đăng xuất</a>
@@ -136,6 +137,37 @@
         </table>
       </div>
     </div>
+
+    <!-- ORDERS TAB -->
+    <div id="tabOrders" style="display:none;">
+      <div class="admin-page-header">
+        <div>
+          <h1>Quản lý đơn hàng</h1>
+          <p style="color: var(--gray-600); font-size: 0.9rem; margin-top: 4px;">Danh sách đơn đặt hàng từ khách hàng</p>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input type="text" class="search-input" id="searchOrders" placeholder="Tìm theo mã đơn, tên khách, SĐT..." />
+          <span style="font-size: 0.85rem; color: var(--gray-600); font-weight: 600;" id="orderCountLabel"></span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="white-space: nowrap; width: 120px;">Mã đơn</th>
+              <th style="white-space: nowrap; min-width: 140px;">Khách hàng</th>
+              <th style="min-width: 220px;">Sản phẩm đặt mua</th>
+              <th style="white-space: nowrap;">Tổng tiền</th>
+              <th style="white-space: nowrap;">Ngày đặt</th>
+              <th style="white-space: nowrap; text-align: center;">Trạng thái</th>
+              <th style="white-space: nowrap; text-align: right;">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTable"></tbody>
+        </table>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -250,6 +282,22 @@
         <button type="submit" class="btn-save">Lưu thông tin</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- ======= MODAL XEM CHI TIẾT ĐƠN HÀNG ======= -->
+<div class="modal-overlay" id="orderDetailModal">
+  <div class="modal" style="max-width: 680px; width: 95%;">
+    <div class="modal-header">
+      <h3 id="orderModalTitle">Chi tiết đơn hàng</h3>
+      <button class="btn-close-modal" onclick="closeModal('orderDetailModal')">✕</button>
+    </div>
+    <div id="orderModalBody" style="font-size: 0.9rem; line-height: 1.5;">
+      <!-- Dữ liệu chi tiết sẽ được đổ vào đây -->
+    </div>
+    <div class="modal-footer" style="margin-top: 20px;">
+      <button type="button" class="btn-cancel" onclick="closeModal('orderDetailModal')">Đóng</button>
+    </div>
   </div>
 </div>
 
