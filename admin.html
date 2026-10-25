@@ -301,6 +301,35 @@
   </div>
 </div>
 
+<!-- ======= MODAL CHỈNH SỬA TRẠNG THÁI ĐƠN HÀNG ======= -->
+<div class="modal-overlay" id="orderStatusModal">
+  <div class="modal" style="max-width: 440px;">
+    <div class="modal-header">
+      <h3>Cập nhật trạng thái đơn hàng</h3>
+      <button class="btn-close-modal" onclick="closeModal('orderStatusModal')">✕</button>
+    </div>
+    <form id="orderStatusForm">
+      <input type="hidden" id="editOrderId" />
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label>Đơn hàng:</label>
+        <input type="text" id="editOrderCode" readonly style="background: var(--gray-100); font-weight: 700; cursor: not-allowed;" />
+      </div>
+      <div class="form-group" style="margin-bottom: 24px;">
+        <label>Chọn trạng thái mới *</label>
+        <select id="editOrderStatusSelect" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1.5px solid var(--gray-200); font-size: 0.95rem; font-weight: 600; background: #fff;">
+          <option value="Chờ xử lý">Chờ xử lý</option>
+          <option value="Đang vận chuyển">Đang vận chuyển</option>
+          <option value="Đã giao">Đã giao</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" onclick="closeModal('orderStatusModal')">Hủy</button>
+        <button type="submit" class="btn-save">Lưu trạng thái</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast-container" id="toastContainer"></div>
 

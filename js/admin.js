@@ -779,12 +779,10 @@ function renderOrdersTable(list = orders) {
             👁 Chi tiết
           </button>
           
-          <!-- 2. NÚT CHỌN TRẠNG THÁI (Chờ xử lý, Đang vận chuyển, Đã giao) -->
-          <select onchange="updateOrderStatus('${o.id}', this.value)" style="padding: 6px 10px; border-radius: 999px; border: 1.5px solid var(--gray-300); font-size: 0.8rem; font-weight: 700; cursor: pointer; background: #fff; margin-left: 6px;">
-            <option value="Chờ xử lý" ${o.status === 'Chờ xử lý' ? 'selected' : ''}>Chờ xử lý</option>
-            <option value="Đang vận chuyển" ${o.status === 'Đang vận chuyển' ? 'selected' : ''}>Đang vận chuyển</option>
-            <option value="Đã giao" ${o.status === 'Đã giao' ? 'selected' : ''}>Đã giao</option>
-          </select>
+          <!-- 2. NÚT SỬA TRẠNG THÁI -->
+          <button class="btn-edit" onclick="openEditOrderStatus('${o.id}')" style="margin-left: 6px;" title="${o.status === 'Đã giao' ? 'Đơn hàng đã giao, không thể sửa' : 'Chỉnh sửa trạng thái đơn hàng'}">
+            ✏ Sửa
+          </button>
 
           <!-- 3. NÚT XÓA ĐƠN HÀNG -->
           <button class="btn-delete" onclick="deleteOrder('${o.id}')" style="margin-left: 6px;" title="Xóa đơn hàng">Xóa</button>
@@ -911,16 +909,62 @@ function viewOrderDetail(orderId) {
   openModal('orderDetailModal');
 }
 
-// Cập nhật trạng thái đơn hàng (Chờ xử lý, Đang vận chuyển, Đã giao)
-function updateOrderStatus(orderId, newStatus) {
+// ============================================================
+// CHỈNH SỬA TRẠNG THÁI ĐƠN HÀNG (Mở modal & kiểm tra Đã giao)
+// ============================================================
+function openEditOrderStatus(orderId) {
   const order = orders.find(o => o.id === orderId);
-  if (order) {
-    order.status = newStatus;
-    localStorage.setItem('orders', JSON.stringify(orders));
-    renderOrdersTable();
-    showToast(`Đã chuyển đơn ${orderId} sang "${newStatus}"!`);
+  if (!order) return;
+
+  // Yêu cầu: Trạng thái "Đã giao" sẽ không thể chuyển lại được nữa
+  if (order.status === 'Đã giao') {
+    alert(`Đơn hàng #${order.id} đã ở trạng thái "ĐÃ GIAO" thành công, không thể chuyển lại trạng thái khác!`);
+    return;
   }
+
+  // Đổ thông tin đơn vào modal sửa
+  document.getElementById('editOrderId').value = order.id;
+  document.getElementById('editOrderCode').value = '#' + order.id + ' - ' + (order.customer?.name || 'Khách');
+  document.getElementById('editOrderStatusSelect').value = order.status;
+
+  openModal('orderStatusModal');
 }
+
+// Xử lý khi bấm nút "Lưu trạng thái" trong modal
+document.getElementById('orderStatusForm')?.addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const orderId = document.getElementById('editOrderId').value;
+  const newStatus = document.getElementById('editOrderStatusSelect').value;
+  const order = orders.find(o => o.id === orderId);
+  if (!order) return;
+
+  // Kiểm tra nếu đơn hiện tại đã giao thì chặn lại
+  if (order.status === 'Đã giao') {
+    alert('Đơn hàng này đã giao thành công, không thể thay đổi trạng thái!');
+    closeModal('orderStatusModal');
+    return;
+  }
+
+  // Nếu chọn đúng trạng thái cũ thì chỉ cần đóng modal
+  if (order.status === newStatus) {
+    closeModal('orderStatusModal');
+    return;
+  }
+
+  // Yêu cầu: Thông báo confirm khi bấm chuyển trạng thái
+  const isConfirm = confirm(`Bạn có chắc chắn muốn chuyển đơn hàng #${order.id} từ "${order.status}" sang "${newStatus}" không?`);
+  if (!isConfirm) return;
+
+  // Cập nhật trạng thái mới và lưu vào localStorage
+  order.status = newStatus;
+  localStorage.setItem('orders', JSON.stringify(orders));
+
+  closeModal('orderStatusModal');
+  renderOrdersTable();
+  renderDashboard();
+  showToast(`Đã chuyển đơn #${order.id} sang "${newStatus}"!`);
+});
 
 // Xóa đơn hàng
 function deleteOrder(orderId) {
@@ -976,7 +1020,7 @@ window.renderCategoriesTable = renderCategoriesTable;
 window.renderCustomersTable  = renderCustomersTable;
 window.renderOrdersTable     = renderOrdersTable;
 window.viewOrderDetail       = viewOrderDetail;
-window.updateOrderStatus     = updateOrderStatus;
+window.openEditOrderStatus   = openEditOrderStatus;
 window.deleteOrder           = deleteOrder;
 window.openAddProductModal   = openAddProductModal;
 window.editProduct           = editProduct;
